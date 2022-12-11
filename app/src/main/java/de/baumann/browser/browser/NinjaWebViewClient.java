@@ -53,7 +53,11 @@ public class NinjaWebViewClient extends WebViewClient {
         this.context = ninjaWebView.getContext();
         this.sp = PreferenceManager.getDefaultSharedPreferences(context);
         this.adBlock = new AdBlock(this.context);
+
+
     }
+
+
 
     @Override
     public void onPageFinished(WebView view, String url) {
@@ -76,6 +80,90 @@ public class NinjaWebViewClient extends WebViewClient {
             action.addHistory(new Record(ninjaWebView.getTitle(), ninjaWebView.getUrl(), System.currentTimeMillis(), 0, 0, ninjaWebView.isDesktopMode(), ninjaWebView.isNightMode(), 0));
             action.close();
         }
+
+        // Inject EIP-1193 provider
+        String systemWalletJs = "if (typeof window.ethereum !== 'undefined') {\n" +
+                "    window.ethereum\n" +
+                "} else {\n" +
+                "    window.ethereum = {\n" +
+                "        isMetaMask: false,\n" +
+                "        selectedAddress: null,\n" +
+                "        chainId: 1,\n" +
+                "        enable: function() {\n" +
+                "            return new Promise(function(resolve, reject) {\n" +
+                "              \tvar addr = window.AndroidEthereum.getAddress()\n" +
+                "                selectedAddress = addr\n" +
+                "                resolve([addr])\n" +
+                "            })\n" +
+                "        },\n" +
+                "        isConnected: true,\n" +
+                "        request: function(request) {\n" +
+                "            return new Promise(function(resolve, reject) {\n" +
+                "                if (request.method == 'eth_requestAccounts') {\n" +
+                "                    var addr = window.AndroidEthereum.getAddress()\n" +
+                "                    selectedAddress = addr\n" +
+                "                    resolve([addr])\n" +
+                "                } else if (request.method == 'eth_accounts') {\n" +
+                "                    var addr = window.AndroidEthereum.getAddress()\n" +
+                "                    selectedAddress = addr\n" +
+                "                    resolve([addr])\n" +
+                "                } else if (request.method == 'eth_sendTransaction') {\n" +
+                "                    var tx = window.AndroidEthereum.signTransaction(JSON.stringify(request.params[0]))\n" +
+                "                    resolve(tx)\n" +
+                "                } else if (request.method == 'eth_sign') {\n" +
+                "                    var sig = window.AndroidEthereum.signMessage(request.params[1])\n" +
+                "                    resolve(sig)\n" +
+                "                } else if (request.method == 'personal_sign') {\n" +
+                "                    var sig = window.AndroidEthereum.signMessage(request.params[2])\n" +
+                "                    resolve(sig)\n" +
+                "                } else if (request.method == 'eth_signTypedData') {\n" +
+                "                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params))\n" +
+                "                    resolve(sig)\n" +
+                "                } else if (request.method == 'eth_signTypedData_v3') {\n" +
+                "                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params))\n" +
+                "                    resolve(sig)\n" +
+                "                } else if (request.method == 'eth_signTypedData_v4') {\n" +
+                "                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params))\n" +
+                "                    resolve(sig)\n" +
+                "                } else if (request.method == 'eth_chainId') {\n" +
+                "                    resolve(1)\n" +
+                "                } else if (request.method == 'net_version') {\n" +
+                "                    resolve(1)\n" +
+                "                } else if (request.method == 'eth_blockNumber') {\n" +
+                "                    var blocknumber = window.AndroidEthereum.getBlocknumber()\n" +
+                "                    resolve(blocknumber)\n" +
+                "                } else if (request.method == 'eth_call') {\n" +
+                "                    var call = window.AndroidEthereum.ethCall(JSON.stringify(request.params[0]))\n" +
+                "                    resolve(call)\n" +
+                "                } else if (request.method == 'eth_estimateGas') {\n" +
+                "                    var gas = window.AndroidEthereum.estimateGas(JSON.stringify(request.params[0]))\n" +
+                "                    console.log(\"Gas used: \", gas)\n" +
+                "                    resolve(gas)\n" +
+                "                } else {\n" +
+                "                    console.log(\"Method: \", request.method, \" Params: \", JSON.stringify(request.params))\n" +
+                "                    reject(new Error(\"Unsupported method: \", request.method))\n" +
+                "                }\n" +
+                "            })\n" +
+                "        },\n" +
+                "        on: function(event, callback) {\n" +
+                "            console.log(\"On Event: \", event)\n" +
+                "            if (event == 'accountsChanged') {\n" +
+                "                var addr = window.AndroidEthereum.getAddress()\n" +
+                "                selectedAddress = addr\n" +
+                "                callback([addr])\n" +
+                "            } else if (event == 'chainChanged') {\n" +
+                "                callback(1)\n" +
+                "            } else if (event == 'networkChanged') {\n" +
+                "                callback(1)\n" +
+                "            } else if (event == 'connect') {\n" +
+                "                callback({\n" +
+                "                    chainId: 1\n" +
+                "                })\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+        view.evaluateJavascript(systemWalletJs, null);
     }
 
     @Override

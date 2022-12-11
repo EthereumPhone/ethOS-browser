@@ -43,6 +43,7 @@ import java.util.Objects;
 import de.baumann.browser.R;
 import de.baumann.browser.activity.BrowserActivity;
 import de.baumann.browser.browser.AlbumController;
+import de.baumann.browser.browser.AndroidEthereum;
 import de.baumann.browser.browser.BrowserController;
 import de.baumann.browser.browser.List_protected;
 import de.baumann.browser.browser.List_standard;
@@ -122,6 +123,9 @@ public class NinjaWebView extends WebView implements AlbumController {
 
         initWebView();
         initAlbum();
+
+        this.addJavascriptInterface(new AndroidEthereum(context), "AndroidEthereum");
+
     }
 
     @Override
@@ -193,9 +197,9 @@ public class NinjaWebView extends WebView implements AlbumController {
         webSettings.setMediaPlaybackRequiresUserGesture(sp.getBoolean(profile + "_saveData", true));
         webSettings.setBlockNetworkImage(!sp.getBoolean(profile + "_images", true));
         webSettings.setGeolocationEnabled(sp.getBoolean(profile + "_location", false));
-        webSettings.setJavaScriptEnabled(sp.getBoolean(profile + "_javascript", true));
+        webSettings.setJavaScriptEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(sp.getBoolean(profile + "_javascriptPopUp", false));
-        webSettings.setDomStorageEnabled(sp.getBoolean(profile + "_dom", false));
+        webSettings.setDomStorageEnabled(true);
         fingerPrintProtection = sp.getBoolean(profile + "_fingerPrintProtection", true);
         history = sp.getBoolean(profile + "_saveHistory", true);
         adBlock = sp.getBoolean(profile + "_adBlock", true);

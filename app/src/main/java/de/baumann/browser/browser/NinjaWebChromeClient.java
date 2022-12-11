@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.view.View;
+import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
@@ -33,6 +34,12 @@ public class NinjaWebChromeClient extends WebChromeClient {
     public NinjaWebChromeClient(NinjaWebView ninjaWebView) {
         super();
         this.ninjaWebView = ninjaWebView;
+    }
+
+    @Override
+    public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+        android.util.Log.d("WebViewConsole", consoleMessage.message());
+        return super.onConsoleMessage(consoleMessage);
     }
 
     @Override
