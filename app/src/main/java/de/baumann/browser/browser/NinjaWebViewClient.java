@@ -474,9 +474,13 @@ public class NinjaWebViewClient extends WebViewClient {
                 "        on: function(event, callback) {\n" +
                 "            console.log(\"On Event: \", event)\n" +
                 "            if (event == 'accountsChanged') {\n" +
-                "                var addr = window.AndroidEthereum.getAddress()\n" +
-                "                selectedAddress = addr\n" +
-                "                callback([addr])\n" +
+                "                (function refresh_wallet() {\n" +
+                "                    if(window.ethereum.selectedAddress != null) {\n" +
+                "                        callback([window.ethereum.selectedAddress])\n" +
+                "                        return\n" +
+                "                    }\n" +
+                "                    setTimeout( refresh_wallet, 5000 );\n" +
+                "                })();\n" +
                 "            } else if (event == 'chainChanged') {\n" +
                 "                callback(1)\n" +
                 "            } else if (event == 'networkChanged') {\n" +
