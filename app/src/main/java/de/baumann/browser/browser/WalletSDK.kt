@@ -91,11 +91,11 @@ class WalletSDK(
         }
     }
 
-    fun signMessage(message: String): CompletableFuture<String> {
+    fun signMessage(message: String, type: Boolean): CompletableFuture<String> {
         val completableFuture = CompletableFuture<String>()
         if(proxy != null) {
             CompletableFuture.runAsync {
-                val reqID = signMessageSys.invoke(proxy, sysSession, message) as String
+                val reqID = signMessageSys.invoke(proxy, sysSession, message, type) as String
 
                 var result: String?;
 

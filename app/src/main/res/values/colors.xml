@@ -66,4 +66,11 @@
     <color name="red">#40f44336</color>
     <color name="teal">#40009688</color>
     <color name="yellow">#40ffc107</color>
+
+    <color name="ethOS_blue">#5550F2</color>
+    <color name="ethOS_blue2">#3D39B8</color>
+    <color name="ethOS_white">#FAFBFF</color>
+    <color name="ethOS_bg">#191919</color>
+    <color name="ethOS_darkgrey">#242424</color>
+    <color name="ethOS_gray">#CDCDCD</color>
 </resources>

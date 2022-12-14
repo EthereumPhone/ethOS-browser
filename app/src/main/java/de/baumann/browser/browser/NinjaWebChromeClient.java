@@ -14,8 +14,11 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -54,6 +57,8 @@ public class NinjaWebChromeClient extends WebChromeClient {
     @Override
     public boolean onCreateWindow(WebView view, boolean dialog, boolean userGesture, android.os.Message resultMsg) {
         Context context = view.getContext();
+        // FrameLayout from activity_main.xml
+
         NinjaWebView newWebView = new NinjaWebView(context);
         view.addView(newWebView);
         WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;

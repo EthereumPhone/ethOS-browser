@@ -24,10 +24,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.NotificationCompat;
 import androidx.preference.PreferenceManager;
 import androidx.webkit.WebSettingsCompat;
@@ -124,7 +127,7 @@ public class NinjaWebView extends WebView implements AlbumController {
         initWebView();
         initAlbum();
 
-        this.addJavascriptInterface(new AndroidEthereum(context), "AndroidEthereum");
+        this.addJavascriptInterface(new AndroidEthereum(context, this), "AndroidEthereum");
 
     }
 
