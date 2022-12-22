@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App -->
-    <string name="app_name">Browserul FOSS</string>
     <string name="app_ok">Confirmă</string>
     <string name="app_help">Ajutor</string>
     <string name="app_cancel">Anulează</string>

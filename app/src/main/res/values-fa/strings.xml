@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App -->
-    <string name="app_name">مرورگر FOSS</string>
     <string name="app_ok">تایید</string>
     <string name="app_help">راهنما</string>
     <string name="app_cancel">لغو</string>

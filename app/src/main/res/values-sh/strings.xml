@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App -->
-    <string name="app_name">FOSS Preglednik</string>
     <string name="app_ok">Uredu</string>
     <string name="app_help">Pomoć</string>
     <string name="app_cancel">Otkaži</string>
