@@ -170,8 +170,8 @@
     <string name="toast_input_empty">Anda belum memasukkan apa pun.</string>
     <string name="toast_invalid_domain">Domain tidak valid</string>
     <string name="toast_webview_forward">Tidak bisa memuat situs selanjutnya</string>
-    <string name="toast_restart">Anda harus memulai ulang \"FOSS Browser\" untuk mengaplikasikan perubahan. Tutup sekarang?</string>
-    <string name="toast_quit">Apakah Anda ingin keluar \"FOSS Browser\"?</string>
+    <string name="toast_restart">Anda harus memulai ulang \"Three\" untuk mengaplikasikan perubahan. Tutup sekarang?</string>
+    <string name="toast_quit">Apakah Anda ingin keluar \"Three\"?</string>
     <string name="toast_quit_TAB">Apakah Anda ingin menutup TAB?</string>
     <string name="toast_downloadComplete">Unduh selesai. Buka manager file?</string>
     <string name="toast_unsecured">Situs web menggunakan koneksi yang tidak aman (\"http\"). Coba koneksi aman (\"https\")?</string>
@@ -192,8 +192,8 @@
     <string name="setting_title_tabsReload">Muat ulang tab</string>
     <string name="setting_title_tabsRestore">Pulihkan tab</string>
     <string name="setting_title_userInterface">Antarmuka pengguna</string>
-    <string name="setting_summary_tabsReload">Muat ulang tab yang dibuka terakhir, saat memulai FOSS Browser.</string>
-    <string name="setting_summary_tabsRestore">Pulihkan tab, saat FOSS Browser dihentikan oleh sistem.</string>
+    <string name="setting_summary_tabsReload">Muat ulang tab yang dibuka terakhir, saat memulai Three.</string>
+    <string name="setting_summary_tabsRestore">Pulihkan tab, saat Three dihentikan oleh sistem.</string>
     <string name="hint_DRM_Media">Izinkan pemutaran media yang dilindungi DRM?</string>
     <string name="menu_reload">Muat ulang</string>
     <string name="menu_restart">Mulai ulang dan muat ulang tab</string>

@@ -170,8 +170,8 @@
     <string name="toast_input_empty">You didn\'t input anything.</string>
     <string name="toast_invalid_domain">Невірний домен</string>
     <string name="toast_webview_forward">Не вдається завантажити наступний сайт</string>
-    <string name="toast_restart">Щоб застосувати зміни, необхідно перезапустити \"FOSS Browser\". Закрити зараз?</string>
-    <string name="toast_quit">Хочете вийти з \"FOSS Browser\"?</string>
+    <string name="toast_restart">Щоб застосувати зміни, необхідно перезапустити \"Three\". Закрити зараз?</string>
+    <string name="toast_quit">Хочете вийти з \"Three\"?</string>
     <string name="toast_quit_TAB">Do you want to close the TAB?</string>
     <string name="toast_downloadComplete">Завантаження завершене. Відкрити файловий менеджер?</string>
     <string name="toast_unsecured">Website uses an unsecured connection (\"http\"). Try a secure connection (\"https\")?</string>
@@ -192,8 +192,8 @@
     <string name="setting_title_tabsReload">Reload tabs</string>
     <string name="setting_title_tabsRestore">Restore tabs</string>
     <string name="setting_title_userInterface">User interface</string>
-    <string name="setting_summary_tabsReload">Reload last opened tabs, when starting FOSS Browser.</string>
-    <string name="setting_summary_tabsRestore">Restore tabs, when FOSS Browser gets killed by the system.</string>
+    <string name="setting_summary_tabsReload">Reload last opened tabs, when starting Three.</string>
+    <string name="setting_summary_tabsRestore">Restore tabs, when Three gets killed by the system.</string>
     <string name="hint_DRM_Media">Allow DRM protected media playback?</string>
     <string name="menu_reload">Reload</string>
     <string name="menu_restart">Restart and reload tabs</string>

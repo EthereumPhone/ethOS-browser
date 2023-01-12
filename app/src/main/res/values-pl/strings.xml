@@ -170,8 +170,8 @@
     <string name="toast_input_empty">Nie wprowadziłeś niczego.</string>
     <string name="toast_invalid_domain">Niewłaściwy adres</string>
     <string name="toast_webview_forward">Nie można załadować kolejnej strony</string>
-    <string name="toast_restart">Musisz uruchomić ponownie \"FOSS Browser\”, aby zachować te zmiany. Zamknąć teraz?</string>
-    <string name="toast_quit">Zamknąć \"FOSS Browser\"?</string>
+    <string name="toast_restart">Musisz uruchomić ponownie \"Three\”, aby zachować te zmiany. Zamknąć teraz?</string>
+    <string name="toast_quit">Zamknąć \"Three\"?</string>
     <string name="toast_quit_TAB">Czy chcesz zamknąć TAB?</string>
     <string name="toast_downloadComplete">Pobieranie ukończone. Otworzyć katalog pobierania?</string>
     <string name="toast_unsecured">Ta witryna używa nieszyfrowanego połączenia (\"http\"). Spróbować przejść na szyfrowane (\"https\")?</string>
@@ -192,8 +192,8 @@
     <string name="setting_title_tabsReload">Przeładuj karty</string>
     <string name="setting_title_tabsRestore">Przywracanie zakładek</string>
     <string name="setting_title_userInterface">Interfejs użytkownika</string>
-    <string name="setting_summary_tabsReload">Przeładuj ostatnio otwarte karty, podczas uruchamiania FOSS Browser.</string>
-    <string name="setting_summary_tabsRestore">Przywracanie zakładek, gdy FOSS Browser zostanie zabity przez system.</string>
+    <string name="setting_summary_tabsReload">Przeładuj ostatnio otwarte karty, podczas uruchamiania Three.</string>
+    <string name="setting_summary_tabsRestore">Przywracanie zakładek, gdy Three zostanie zabity przez system.</string>
     <string name="hint_DRM_Media">Zezwolić na odtwarzanie mediów chronionych DRM?</string>
     <string name="menu_reload">Reload</string>
     <string name="menu_restart">Uruchom ponownie i załaduj ponownie karty</string>

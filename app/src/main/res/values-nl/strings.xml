@@ -193,7 +193,7 @@
     <string name="setting_title_tabsRestore">Tabbladen herstellen</string>
     <string name="setting_title_userInterface">Gebruikers-interface</string>
     <string name="setting_summary_tabsReload">Herlaad laatst geopende tabbladen, bij het starten van de FOSS-browser.</string>
-    <string name="setting_summary_tabsRestore">Tabbladen herstellen wanneer de FOSS Browser wordt gedood door het systeem.</string>
+    <string name="setting_summary_tabsRestore">Tabbladen herstellen wanneer de Three wordt gedood door het systeem.</string>
     <string name="hint_DRM_Media">DRM-beschermde media weergeven?</string>
     <string name="menu_reload">Herladen</string>
     <string name="menu_restart">Herstart en herlaad tabbladen</string>

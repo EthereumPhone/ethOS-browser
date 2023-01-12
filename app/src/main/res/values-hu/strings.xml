@@ -170,8 +170,8 @@
     <string name="toast_input_empty">Nem írt be semmit.</string>
     <string name="toast_invalid_domain">Érvénytelen tartomány</string>
     <string name="toast_webview_forward">Nem tölthető be a következő oldal</string>
-    <string name="toast_restart">A változások alkalmazásához újra kell indítania a \"FOSS Browser\"-t. Bezárja most?</string>
-    <string name="toast_quit">Ki akar lépni a \"FOSS Browser\"-ből?</string>
+    <string name="toast_restart">A változások alkalmazásához újra kell indítania a \"Three\"-t. Bezárja most?</string>
+    <string name="toast_quit">Ki akar lépni a \"Three\"-ből?</string>
     <string name="toast_quit_TAB">Be akarja zárni a TAB-ot?</string>
     <string name="toast_downloadComplete">Befejezve a letöltés. Megnyitja a fájlkezelőt?</string>
     <string name="toast_unsecured">A weboldal nem biztonságos kapcsolatot használ (\"http\"). Megpróbálja a biztonságos kapcsolatot (\"https\")?</string>
@@ -192,8 +192,8 @@
     <string name="setting_title_tabsReload">Lapok újratöltése</string>
     <string name="setting_title_tabsRestore">Lapok visszaállítása</string>
     <string name="setting_title_userInterface">Felhasználói felület</string>
-    <string name="setting_summary_tabsReload">Utoljára megnyitott lapok újratöltése a FOSS Browser indításakor.</string>
-    <string name="setting_summary_tabsRestore">A lapok visszaállítása, ha a FOSS Browser-t megöli a rendszer.</string>
+    <string name="setting_summary_tabsReload">Utoljára megnyitott lapok újratöltése a Three indításakor.</string>
+    <string name="setting_summary_tabsRestore">A lapok visszaállítása, ha a Three-t megöli a rendszer.</string>
     <string name="hint_DRM_Media">DRM-védett média lejátszásának engedélyezése?</string>
     <string name="menu_reload">Újratöltés</string>
     <string name="menu_restart">Újraindítás és a lapok újratöltése</string>

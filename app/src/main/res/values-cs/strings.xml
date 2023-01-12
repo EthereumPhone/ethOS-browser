@@ -170,8 +170,8 @@
     <string name="toast_input_empty">Nic jste nevložili.</string>
     <string name="toast_invalid_domain">Neplatná doména</string>
     <string name="toast_webview_forward">Nelze načíst další stránku</string>
-    <string name="toast_restart">Pro provedení změn musíte restartovat aplikaci „FOSS Browser“. Ukončit nyní?</string>
-    <string name="toast_quit">Opravdu chcete ukončit aplikaci „FOSS Browser“?</string>
+    <string name="toast_restart">Pro provedení změn musíte restartovat aplikaci „Three“. Ukončit nyní?</string>
+    <string name="toast_quit">Opravdu chcete ukončit aplikaci „Three“?</string>
     <string name="toast_quit_TAB">Chcete zavřít KARTU?</string>
     <string name="toast_downloadComplete">Stahování dokončeno. Otevřít správce souborů?</string>
     <string name="toast_unsecured">Stránka používá nezabezpečené připojení („http“). Chcete zkusit zabezpečné připojení („https“)?</string>
@@ -192,8 +192,8 @@
     <string name="setting_title_tabsReload">Znovu načíst karty</string>
     <string name="setting_title_tabsRestore">Obnovit karty</string>
     <string name="setting_title_userInterface">Uživatelské rozhraní</string>
-    <string name="setting_summary_tabsReload">Znovu načíst naposledy otevřené karty při spuštění aplikace FOSS Browser.</string>
-    <string name="setting_summary_tabsRestore">Obnovit karty při ukončení aplikace FOSS Browser systémem.</string>
+    <string name="setting_summary_tabsReload">Znovu načíst naposledy otevřené karty při spuštění aplikace Three.</string>
+    <string name="setting_summary_tabsRestore">Obnovit karty při ukončení aplikace Three systémem.</string>
     <string name="hint_DRM_Media">Povolit přehrávání médií chráněných DRM?</string>
     <string name="menu_reload">Obnovit</string>
     <string name="menu_restart">Restartování a opětovné načtení karet</string>

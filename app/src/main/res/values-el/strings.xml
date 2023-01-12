@@ -170,8 +170,8 @@
     <string name="toast_input_empty">Δεν έχετε εισάγει τίποτα.</string>
     <string name="toast_invalid_domain">Μη έγκυρο domain</string>
     <string name="toast_webview_forward">Αδυναμία φόρτωσης επόμενης ιστοσελίδας</string>
-    <string name="toast_restart">Πρέπει να επανεκκινήσετε το \"FOSS Browser\" για να εφαρμόσετε τις αλλαγές. Κλείσιμο τώρα;</string>
-    <string name="toast_quit">Θέλετε να κλείσετε το \"FOSS Browser\";</string>
+    <string name="toast_restart">Πρέπει να επανεκκινήσετε το \"Three\" για να εφαρμόσετε τις αλλαγές. Κλείσιμο τώρα;</string>
+    <string name="toast_quit">Θέλετε να κλείσετε το \"Three\";</string>
     <string name="toast_quit_TAB">Θέλετε να κλείσετε την καρτέλα;</string>
     <string name="toast_downloadComplete">Η λήψη ολοκληρώθηκε. Άνοιγμα διαχειριστή αρχείων;</string>
     <string name="toast_unsecured">Η ιστοσελίδα χρησιμοποιεί μια μη ασφαλή σύνδεση (\"http\"). Δοκιμάστε μια ασφαλή σύνδεση (\"https\");</string>
@@ -192,8 +192,8 @@
     <string name="setting_title_tabsReload">Επαναφόρτωση καρτελών</string>
     <string name="setting_title_tabsRestore">Επαναφορά καρτελών</string>
     <string name="setting_title_userInterface">Διεπαφή χρήστη</string>
-    <string name="setting_summary_tabsReload">Επαναφόρτωση των τελευταίων ανοιχτών καρτελών, κατά την εκκίνηση του FOSS Browser.</string>
-    <string name="setting_summary_tabsRestore">Επαναφορά καρτελών, όταν το FOSS Browser τερματιστεί από το σύστημα.</string>
+    <string name="setting_summary_tabsReload">Επαναφόρτωση των τελευταίων ανοιχτών καρτελών, κατά την εκκίνηση του Three.</string>
+    <string name="setting_summary_tabsRestore">Επαναφορά καρτελών, όταν το Three τερματιστεί από το σύστημα.</string>
     <string name="hint_DRM_Media">Να επιτρέπεται η προστατευμένη αναπαραγωγή πολυμέσων DRM;</string>
     <string name="menu_reload">Επαναφόρτωση</string>
     <string name="menu_restart">Επανεκκίνηση και επαναφόρτωση καρτελών</string>

@@ -170,8 +170,8 @@
     <string name="toast_input_empty">Non hai inserito nulla.</string>
     <string name="toast_invalid_domain">Dominio non valido</string>
     <string name="toast_webview_forward">Non è possibile caricare il sito successivo</string>
-    <string name="toast_restart">Per applicare le modifiche è necessario riavviare \"FOSS Browser\". Chiudere ora?</string>
-    <string name="toast_quit">Vuoi uscire da \"FOSS Browser\"?</string>
+    <string name="toast_restart">Per applicare le modifiche è necessario riavviare \"Three\". Chiudere ora?</string>
+    <string name="toast_quit">Vuoi uscire da \"Three\"?</string>
     <string name="toast_quit_TAB">Vuoi chiudere la scheda?</string>
     <string name="toast_downloadComplete">Download completato. Aprire File Manager?</string>
     <string name="toast_unsecured">Il sito web utilizza una connessione non protetta (\"http\"). Provare una connessione sicura (\"&lt;unk&gt; \")?</string>
@@ -192,8 +192,8 @@
     <string name="setting_title_tabsReload">Ricaricare le schede</string>
     <string name="setting_title_tabsRestore">Ripristinare le schede</string>
     <string name="setting_title_userInterface">Interfaccia utente</string>
-    <string name="setting_summary_tabsReload">Ricarica le ultime schede aperte all\'avvio di FOSS Browser.</string>
-    <string name="setting_summary_tabsRestore">Ripristinare le schede, quando FOSS Browser viene ucciso dal sistema.</string>
+    <string name="setting_summary_tabsReload">Ricarica le ultime schede aperte all\'avvio di Three.</string>
+    <string name="setting_summary_tabsRestore">Ripristinare le schede, quando Three viene ucciso dal sistema.</string>
     <string name="hint_DRM_Media">Consentire la riproduzione di supporti protetti da DRM?</string>
     <string name="menu_reload">Ricarica</string>
     <string name="menu_restart">Riavvia e ricarica le schede</string>

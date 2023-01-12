@@ -170,7 +170,7 @@
     <string name="toast_input_empty">לא הזנת כלום.</string>
     <string name="toast_invalid_domain">דומיין לא חוקי</string>
     <string name="toast_webview_forward">לא ניתן לטעון את האתר הבא</string>
-    <string name="toast_restart">עליך להפעיל מחדש את \"FOSS Browser\" כדי להחיל שינויים. לסגור עכשיו?</string>
+    <string name="toast_restart">עליך להפעיל מחדש את \"Three\" כדי להחיל שינויים. לסגור עכשיו?</string>
     <string name="toast_quit">האם ברצונך לצאת מ\"דפדפן FOSS\"?</string>
     <string name="toast_quit_TAB">האם אתה רוצה לסגור את ה-TAB?</string>
     <string name="toast_downloadComplete">ההורדה הושלמה. לפתוח את מנהל הקבצים?</string>
