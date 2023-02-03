@@ -3,52 +3,80 @@ if (typeof window.ethereum !== 'undefined') {
 } else {
     
     window.ethereum = {
-        isMetaMask: false,
+        isMetaMask: true,
         selectedAddress: null,
-        chainId: 1,
+        chainId: "CURRENT_CHAIN_ID",
         enable: function() {
             return new Promise(function(resolve, reject) {
-              	var addr = window.AndroidEthereum.enableWallet()
-                selectedAddress = addr
-                isConnected = true
+                if (window.ethereum.selectedAddress != null) {
+                    resolve([window.ethereum.selectedAddress])
+                    return
+                }
+                var addr = window.AndroidEthereum.enableWallet()
+                console.log("Request Accounts: ", addr)
+                window.ethereum.selectedAddress = addr
+                window.ethereum.isConnectedVar = true
                 resolve([addr])
             })
         },
-        isConnected: false,
+        isConnectedVar: false,
+        isConnected: function() {
+            return window.ethereum.isConnectedVar;
+        },
         request: function(request) {
-            console.log("Request: ", request)
+            console.log("Request: ", JSON.stringify(request))
             return new Promise(function(resolve, reject) {
                 console.log("Method dude: ", request.method, " Params dd: ", JSON.stringify(request.params))
                 if (request.method == 'eth_requestAccounts') {
+                    console.log("Selected Address: ", window.ethereum.selectedAddress)
+                    if (window.ethereum.selectedAddress != null) {
+                        resolve([window.ethereum.selectedAddress])
+                        return
+                    }
                     var addr = window.AndroidEthereum.enableWallet()
                     console.log("Request Accounts: ", addr)
-                    selectedAddress = addr
-                    isConnected = true
+                    window.ethereum.selectedAddress = addr
+                    window.ethereum.isConnectedVar = true
                     resolve([addr])
+                } else if (request.method == 'wallet_switchEthereumChain') {
+                    var chainId = request.params[0].chainId
+                    var chain = window.AndroidEthereum.switchChain(chainId)
+                    console.log("Switch Chain: ", chain)
+                    window.ethereum.chainId = chain
+                    resolve(chain)
                 } else if (request.method == 'eth_accounts') {
                     var addr = window.AndroidEthereum.getAddress()
                     selectedAddress = addr
                     resolve([addr])
                 } else if (request.method == 'eth_sendTransaction') {
+                    console.log("Send Transaction: ", JSON.stringify(request.params))
                     var tx = window.AndroidEthereum.signTransaction(JSON.stringify(request.params[0]))
                     resolve(tx)
                 } else if (request.method == 'eth_sign') {
                     var sig = window.AndroidEthereum.signMessage(request.params[1], request.method)
+                    if (sig == "declined") {
+                        reject(new Error(4001, 'User rejected the request'))
+                    }
                     resolve(sig)
                 } else if (request.method == 'personal_sign') {
                     var sig = window.AndroidEthereum.signMessage(request.params[0], request.method)
                     resolve(sig)
                 } else if (request.method == 'eth_signTypedData') {
-                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params), request.method)
+                    console.log("Typed Data V1: ", JSON.stringify(request.params[1]))
+                    var sig = window.AndroidEthereum.signMessage(JSON.stringify(request.params[1]), request.method)
                     resolve(sig)
                 } else if (request.method == 'eth_signTypedData_v3') {
-                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params), request.method)
+                    console.log("Typed Data: ", JSON.stringify(request.params[1]))
+                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params[1]))
                     resolve(sig)
                 } else if (request.method == 'eth_signTypedData_v4') {
-                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params), request.method)
+                    console.log("Typed Data V4: ", JSON.stringify(request.params[1]))
+                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params[1]))
                     resolve(sig)
                 } else if (request.method == 'eth_chainId') {
-                    resolve(1)
+                    console.log("ChainId: ", window.ethereum.chainId)
+                    console.log("chainId-Params: ", JSON.stringify(request.params))
+                    resolve(window.ethereum.chainId)
                 } else if (request.method == 'net_version') {
                     resolve(1)
                 } else if (request.method == 'eth_blockNumber') {
@@ -60,9 +88,23 @@ if (typeof window.ethereum !== 'undefined') {
                 } else if (request.method == 'eth_estimateGas') {
                     var gas = window.AndroidEthereum.estimateGas(JSON.stringify(request.params[0]))
                     resolve(gas)
+                } else if (request.method == 'eth_getTransactionByHash') {
+                    var jsonStr = window.AndroidEthereum.getTransactionByHash(request.params[0])
+                    console.log("Transaction-result: ", jsonStr)
+                    if (jsonStr == "0") {
+                        resolve({})
+                    }
+                    resolve(JSON.parse(jsonStr))
+                } else if (request.method == 'eth_getTransactionReceipt') {
+                    var jsonStr = window.AndroidEthereum.getTransactionReceipt(request.params[0])
+                    console.log("Transaction-receipt: ", jsonStr)
+                    if (jsonStr == "0") {
+                        resolve(null)
+                    }
+                    resolve(JSON.parse(jsonStr))
                 } else {
                     console.log("Method: ", request.method, " Params: ", JSON.stringify(request.params))
-                    reject(new Error("Unsupported method: ", request.method))
+                    reject(new Error("Not cool method: ", request.method))
                 }
             })
         },
@@ -77,14 +119,14 @@ if (typeof window.ethereum !== 'undefined') {
                     setTimeout( refresh_wallet, 5000 );
                 })();
             } else if (event == 'chainChanged') {
-                callback(1)
+                //callback(1)
             } else if (event == 'networkChanged') {
-                callback(1)
+                //callback(1)
             } else if (event == 'connect') {
                 (function my_func() {
-                    if(window.ethereum.isConnected == true) {
+                    if(window.ethereum.isConnected() == true) {
                         callback({
-                            chainId: 1
+                            chainId: window.ethereum.chainId,
                         })
                         return
                     }

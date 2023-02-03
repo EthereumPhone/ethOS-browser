@@ -30,6 +30,9 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.ByteArrayInputStream;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import de.baumann.browser.R;
 import de.baumann.browser.database.Record;
@@ -408,52 +411,80 @@ public class NinjaWebViewClient extends WebViewClient {
                 "} else {\n" +
                 "    \n" +
                 "    window.ethereum = {\n" +
-                "        isMetaMask: false,\n" +
+                "        isMetaMask: true,\n" +
                 "        selectedAddress: null,\n" +
-                "        chainId: 1,\n" +
+                "        chainId: \"CURRENT_CHAIN_ID\",\n" +
                 "        enable: function() {\n" +
                 "            return new Promise(function(resolve, reject) {\n" +
-                "              \tvar addr = window.AndroidEthereum.enableWallet()\n" +
-                "                selectedAddress = addr\n" +
-                "                isConnected = true\n" +
+                "                if (window.ethereum.selectedAddress != null) {\n" +
+                "                    resolve([window.ethereum.selectedAddress])\n" +
+                "                    return\n" +
+                "                }\n" +
+                "                var addr = window.AndroidEthereum.enableWallet()\n" +
+                "                console.log(\"Request Accounts: \", addr)\n" +
+                "                window.ethereum.selectedAddress = addr\n" +
+                "                window.ethereum.isConnectedVar = true\n" +
                 "                resolve([addr])\n" +
                 "            })\n" +
                 "        },\n" +
-                "        isConnected: false,\n" +
+                "        isConnectedVar: false,\n" +
+                "        isConnected: function() {\n" +
+                "            return window.ethereum.isConnectedVar;\n" +
+                "        },\n" +
                 "        request: function(request) {\n" +
-                "            console.log(\"Request: \", request)\n" +
+                "            console.log(\"Request: \", JSON.stringify(request))\n" +
                 "            return new Promise(function(resolve, reject) {\n" +
                 "                console.log(\"Method dude: \", request.method, \" Params dd: \", JSON.stringify(request.params))\n" +
                 "                if (request.method == 'eth_requestAccounts') {\n" +
+                "                    console.log(\"Selected Address: \", window.ethereum.selectedAddress)\n" +
+                "                    if (window.ethereum.selectedAddress != null) {\n" +
+                "                        resolve([window.ethereum.selectedAddress])\n" +
+                "                        return\n" +
+                "                    }\n" +
                 "                    var addr = window.AndroidEthereum.enableWallet()\n" +
                 "                    console.log(\"Request Accounts: \", addr)\n" +
-                "                    selectedAddress = addr\n" +
-                "                    isConnected = true\n" +
+                "                    window.ethereum.selectedAddress = addr\n" +
+                "                    window.ethereum.isConnectedVar = true\n" +
                 "                    resolve([addr])\n" +
+                "                } else if (request.method == 'wallet_switchEthereumChain') {\n" +
+                "                    var chainId = request.params[0].chainId\n" +
+                "                    var chain = window.AndroidEthereum.switchChain(chainId)\n" +
+                "                    console.log(\"Switch Chain: \", chain)\n" +
+                "                    window.ethereum.chainId = chain\n" +
+                "                    resolve(chain)\n" +
                 "                } else if (request.method == 'eth_accounts') {\n" +
                 "                    var addr = window.AndroidEthereum.getAddress()\n" +
                 "                    selectedAddress = addr\n" +
                 "                    resolve([addr])\n" +
                 "                } else if (request.method == 'eth_sendTransaction') {\n" +
+                "                    console.log(\"Send Transaction: \", JSON.stringify(request.params))\n" +
                 "                    var tx = window.AndroidEthereum.signTransaction(JSON.stringify(request.params[0]))\n" +
                 "                    resolve(tx)\n" +
                 "                } else if (request.method == 'eth_sign') {\n" +
                 "                    var sig = window.AndroidEthereum.signMessage(request.params[1], request.method)\n" +
+                "                    if (sig == \"declined\") {\n" +
+                "                        reject(new Error(4001, 'User rejected the request'))\n" +
+                "                    }\n" +
                 "                    resolve(sig)\n" +
                 "                } else if (request.method == 'personal_sign') {\n" +
                 "                    var sig = window.AndroidEthereum.signMessage(request.params[0], request.method)\n" +
                 "                    resolve(sig)\n" +
                 "                } else if (request.method == 'eth_signTypedData') {\n" +
-                "                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params), request.method)\n" +
+                "                    console.log(\"Typed Data V1: \", JSON.stringify(request.params[1]))\n" +
+                "                    var sig = window.AndroidEthereum.signMessage(JSON.stringify(request.params[1]), request.method)\n" +
                 "                    resolve(sig)\n" +
                 "                } else if (request.method == 'eth_signTypedData_v3') {\n" +
-                "                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params), request.method)\n" +
+                "                    console.log(\"Typed Data: \", JSON.stringify(request.params[1]))\n" +
+                "                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params[1]))\n" +
                 "                    resolve(sig)\n" +
                 "                } else if (request.method == 'eth_signTypedData_v4') {\n" +
-                "                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params), request.method)\n" +
+                "                    console.log(\"Typed Data V4: \", JSON.stringify(request.params[1]))\n" +
+                "                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params[1]))\n" +
                 "                    resolve(sig)\n" +
                 "                } else if (request.method == 'eth_chainId') {\n" +
-                "                    resolve(1)\n" +
+                "                    console.log(\"ChainId: \", window.ethereum.chainId)\n" +
+                "                    console.log(\"chainId-Params: \", JSON.stringify(request.params))\n" +
+                "                    resolve(window.ethereum.chainId)\n" +
                 "                } else if (request.method == 'net_version') {\n" +
                 "                    resolve(1)\n" +
                 "                } else if (request.method == 'eth_blockNumber') {\n" +
@@ -465,9 +496,23 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                } else if (request.method == 'eth_estimateGas') {\n" +
                 "                    var gas = window.AndroidEthereum.estimateGas(JSON.stringify(request.params[0]))\n" +
                 "                    resolve(gas)\n" +
+                "                } else if (request.method == 'eth_getTransactionByHash') {\n" +
+                "                    var jsonStr = window.AndroidEthereum.getTransactionByHash(request.params[0])\n" +
+                "                    console.log(\"Transaction-result: \", jsonStr)\n" +
+                "                    if (jsonStr == \"0\") {\n" +
+                "                        resolve({})\n" +
+                "                    }\n" +
+                "                    resolve(JSON.parse(jsonStr))\n" +
+                "                } else if (request.method == 'eth_getTransactionReceipt') {\n" +
+                "                    var jsonStr = window.AndroidEthereum.getTransactionReceipt(request.params[0])\n" +
+                "                    console.log(\"Transaction-receipt: \", jsonStr)\n" +
+                "                    if (jsonStr == \"0\") {\n" +
+                "                        resolve(null)\n" +
+                "                    }\n" +
+                "                    resolve(JSON.parse(jsonStr))\n" +
                 "                } else {\n" +
                 "                    console.log(\"Method: \", request.method, \" Params: \", JSON.stringify(request.params))\n" +
-                "                    reject(new Error(\"Unsupported method: \", request.method))\n" +
+                "                    reject(new Error(\"Not cool method: \", request.method))\n" +
                 "                }\n" +
                 "            })\n" +
                 "        },\n" +
@@ -482,14 +527,14 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                    setTimeout( refresh_wallet, 5000 );\n" +
                 "                })();\n" +
                 "            } else if (event == 'chainChanged') {\n" +
-                "                callback(1)\n" +
+                "                //callback(1)\n" +
                 "            } else if (event == 'networkChanged') {\n" +
-                "                callback(1)\n" +
+                "                //callback(1)\n" +
                 "            } else if (event == 'connect') {\n" +
                 "                (function my_func() {\n" +
-                "                    if(window.ethereum.isConnected == true) {\n" +
+                "                    if(window.ethereum.isConnected() == true) {\n" +
                 "                        callback({\n" +
-                "                            chainId: 1\n" +
+                "                            chainId: window.ethereum.chainId,\n" +
                 "                        })\n" +
                 "                        return\n" +
                 "                    }\n" +
@@ -500,7 +545,21 @@ public class NinjaWebViewClient extends WebViewClient {
                 "        }\n" +
                 "    }\n" +
                 "}\n";
+        try {
+            systemWalletJs = systemWalletJs.replace("CURRENT_CHAIN_ID", toHexString(new WalletSDK(context, "https://cloudflare-eth.com").getChainId().get(2, TimeUnit.SECONDS)));
+        } catch (ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         view.evaluateJavascript(systemWalletJs, null);
+    }
+
+    /**
+     * Function to turn Integer into a hex string starting with 0x
+     */
+    private String toHexString(int i) {
+        return "0x" + Integer.toHexString(i);
     }
 
     @Override

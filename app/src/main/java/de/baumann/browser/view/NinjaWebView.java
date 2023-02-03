@@ -231,6 +231,7 @@ public class NinjaWebView extends WebView implements AlbumController {
             manager.setAcceptCookie(true);
             manager.getCookie(url);
         } else manager.setAcceptCookie(false);
+        manager.setAcceptThirdPartyCookies(this, true);
         profile = profileOriginal;
     }
 
