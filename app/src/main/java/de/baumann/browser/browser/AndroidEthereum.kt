@@ -47,18 +47,21 @@ class AndroidEthereum(
     var web3j = Web3j.build(HttpService(chainRPC))
 
     init {
-        chainId = walletSDK.getChainId().get().toString()
+        chainId = walletSDK.getChainId().toString()
         initialSetBasedOnChainId()
+        /*
         CompletableFuture.runAsync {
             Thread.sleep(10000)
             while (isRunning) {
                 chainId = walletSDK.getChainId().toString()
                 initialSetBasedOnChainId()
                 (context as Activity).runOnUiThread {
-                    webView.evaluateJavascript("window.ethereum.chainId=\"${toHexString(walletSDK.getChainId().get())}\"", null);
+                    webView.evaluateJavascript("window.ethereum.chainId=\"${toHexString(walletSDK.getChainId())}\"", null);
                 }
+                Thread.sleep(10000)
             }
         }
+        */
     }
 
     private fun toHexString(i: Int): String {
@@ -369,7 +372,7 @@ class AndroidEthereum(
         val declineButton = mainView.findViewById<com.google.android.material.button.MaterialButton>(R.id.declinebtn)
         val text = mainView.findViewById<TextView>(R.id.choosemethod)
         (context as Activity).runOnUiThread {
-            text.setText("Do you want to connect your wallet to ${getDomainName(webView.url!!)}?")
+            text.setText("Do you want to connect your ethOS wallet to ${getDomainName(webView.url!!)}?")
         }
 
         acceptButton.setOnClickListener {

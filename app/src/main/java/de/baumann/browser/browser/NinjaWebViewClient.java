@@ -545,13 +545,7 @@ public class NinjaWebViewClient extends WebViewClient {
                 "        }\n" +
                 "    }\n" +
                 "}\n";
-        try {
-            systemWalletJs = systemWalletJs.replace("CURRENT_CHAIN_ID", toHexString(new WalletSDK(context, "https://cloudflare-eth.com").getChainId().get(2, TimeUnit.SECONDS)));
-        } catch (ExecutionException | TimeoutException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        systemWalletJs = systemWalletJs.replace("CURRENT_CHAIN_ID", toHexString(new WalletSDK(context, "https://cloudflare-eth.com").getChainId()));
         view.evaluateJavascript(systemWalletJs, null);
     }
 
