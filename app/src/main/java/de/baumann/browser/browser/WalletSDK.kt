@@ -137,16 +137,21 @@ class WalletSDK(
         return sb.toString()
     }
 
-    fun signMessage(messageT: String, type: String = "personal_sign"): CompletableFuture<String> {
+    fun signMessage(messageT: String, typeT: String = "personal_sign"): CompletableFuture<String> {
         val completableFuture = CompletableFuture<String>()
-        val message = if (type == "personal_sign_hex") {
+        val message = if (typeT == "personal_sign_hex") {
             hexToString(messageT.substring(2))
         } else {
             messageT
         }
+        val type = if (typeT == "personal_sign_hex") {
+            "personal_sign"
+        } else {
+            typeT
+        }
         if (proxy != null) {
             CompletableFuture.runAsync {
-                val reqID = signMessageSys.invoke(proxy, sysSession, message, "personal_sign") as String
+                val reqID = signMessageSys.invoke(proxy, sysSession, message, type) as String
 
                 var result = NOTFULFILLED
 
