@@ -1,5 +1,7 @@
 package de.baumann.browser.browser;
 
+import static de.baumann.browser.activity.BrowserActivity.hookWebView;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -58,7 +60,7 @@ public class NinjaWebChromeClient extends WebChromeClient {
     public boolean onCreateWindow(WebView view, boolean dialog, boolean userGesture, android.os.Message resultMsg) {
         Context context = view.getContext();
         // FrameLayout from activity_main.xml
-
+        hookWebView();
         NinjaWebView newWebView = new NinjaWebView(context);
         view.addView(newWebView);
         WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;

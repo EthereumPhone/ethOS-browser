@@ -49,19 +49,25 @@ class AndroidEthereum(
     init {
         chainId = walletSDK.getChainId().toString()
         initialSetBasedOnChainId()
-        /*
         CompletableFuture.runAsync {
             Thread.sleep(10000)
             while (isRunning) {
-                chainId = walletSDK.getChainId().toString()
-                initialSetBasedOnChainId()
+                val newestChainIdNotHex = walletSDK.getChainId()
+
                 (context as Activity).runOnUiThread {
-                    webView.evaluateJavascript("window.ethereum.chainId=\"${toHexString(walletSDK.getChainId())}\"", null);
+                    if (newestChainIdNotHex != Integer.parseInt(chainId)) {
+                        chainId = newestChainIdNotHex.toString()
+                        initialSetBasedOnChainId()
+                        webView.evaluateJavascript("window.ethereum.chainId=\"${toHexString(newestChainIdNotHex)}\"", null);
+                        webView.evaluateJavascript("if (window.ethereum.savedChainChangedCallback != null) {\n" +
+                                "    console.log('CHANGING CHAIN'); window.ethereum.savedChainChangedCallback(\"${toHexString(newestChainIdNotHex)}\")\n" +
+                                "}", null)
+                    }
                 }
-                Thread.sleep(10000)
+                Thread.sleep(1000)
             }
         }
-        */
+
     }
 
     private fun toHexString(i: Int): String {
@@ -103,6 +109,11 @@ class AndroidEthereum(
                 )
             }
         }
+    }
+
+    @JavascriptInterface
+    fun getNewestChainId(): String {
+        return toHexString(walletSDK.getChainId())
     }
 
     @JavascriptInterface

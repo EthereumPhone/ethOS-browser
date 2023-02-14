@@ -100,6 +100,7 @@ public class NinjaWebView extends WebView implements AlbumController {
         super(context, attrs, defStyleAttr);
     }
 
+
     public NinjaWebView(Context context) {
         super(context);
         sp = PreferenceManager.getDefaultSharedPreferences(context);

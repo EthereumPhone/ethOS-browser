@@ -6,6 +6,7 @@ if (typeof window.ethereum !== 'undefined') {
         isMetaMask: true,
         selectedAddress: null,
         chainId: "CURRENT_CHAIN_ID",
+        savedChainChangedCallback: null,
         enable: function() {
             return new Promise(function(resolve, reject) {
                 if (window.ethereum.selectedAddress != null) {
@@ -74,9 +75,8 @@ if (typeof window.ethereum !== 'undefined') {
                     var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params[1]))
                     resolve(sig)
                 } else if (request.method == 'eth_chainId') {
-                    console.log("ChainId: ", window.ethereum.chainId)
-                    console.log("chainId-Params: ", JSON.stringify(request.params))
-                    resolve(window.ethereum.chainId)
+                    var newestChainId = window.AndroidEthereum.getNewestChainId()
+                    resolve(newestChainId)
                 } else if (request.method == 'net_version') {
                     resolve(1)
                 } else if (request.method == 'eth_blockNumber') {
@@ -120,8 +120,10 @@ if (typeof window.ethereum !== 'undefined') {
                 })();
             } else if (event == 'chainChanged') {
                 //callback(1)
+                window.ethereum.savedChainChangedCallback = callback
             } else if (event == 'networkChanged') {
                 //callback(1)
+                //window.ethereum.savedChainChangedCallback = callback
             } else if (event == 'connect') {
                 (function my_func() {
                     if(window.ethereum.isConnected() == true) {

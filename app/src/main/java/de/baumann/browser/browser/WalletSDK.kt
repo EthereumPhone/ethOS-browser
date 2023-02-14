@@ -221,7 +221,6 @@ class WalletSDK(
 
     fun getChainId(): Int {
         if (proxy != null) {
-            /*
             val completableFuture = CompletableFuture<Int>()
             CompletableFuture.runAsync {
                 val reqId = getChainId.invoke(proxy, sysSession) as String
@@ -238,8 +237,6 @@ class WalletSDK(
                 )
             }
             return completableFuture.get()
-            */
-             return 1
         } else {
             throw Exception("No system wallet found")
         }

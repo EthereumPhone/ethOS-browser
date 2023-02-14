@@ -414,6 +414,7 @@ public class NinjaWebViewClient extends WebViewClient {
                 "        isMetaMask: true,\n" +
                 "        selectedAddress: null,\n" +
                 "        chainId: \"CURRENT_CHAIN_ID\",\n" +
+                "        savedChainChangedCallback: null,\n" +
                 "        enable: function() {\n" +
                 "            return new Promise(function(resolve, reject) {\n" +
                 "                if (window.ethereum.selectedAddress != null) {\n" +
@@ -482,9 +483,8 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params[1]))\n" +
                 "                    resolve(sig)\n" +
                 "                } else if (request.method == 'eth_chainId') {\n" +
-                "                    console.log(\"ChainId: \", window.ethereum.chainId)\n" +
-                "                    console.log(\"chainId-Params: \", JSON.stringify(request.params))\n" +
-                "                    resolve(window.ethereum.chainId)\n" +
+                "                    var newestChainId = window.AndroidEthereum.getNewestChainId()\n" +
+                "                    resolve(newestChainId)\n" +
                 "                } else if (request.method == 'net_version') {\n" +
                 "                    resolve(1)\n" +
                 "                } else if (request.method == 'eth_blockNumber') {\n" +
@@ -528,8 +528,10 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                })();\n" +
                 "            } else if (event == 'chainChanged') {\n" +
                 "                //callback(1)\n" +
+                "                window.ethereum.savedChainChangedCallback = callback\n" +
                 "            } else if (event == 'networkChanged') {\n" +
                 "                //callback(1)\n" +
+                "                //window.ethereum.savedChainChangedCallback = callback\n" +
                 "            } else if (event == 'connect') {\n" +
                 "                (function my_func() {\n" +
                 "                    if(window.ethereum.isConnected() == true) {\n" +
@@ -545,7 +547,8 @@ public class NinjaWebViewClient extends WebViewClient {
                 "        }\n" +
                 "    }\n" +
                 "}\n";
-        systemWalletJs = systemWalletJs.replace("CURRENT_CHAIN_ID", toHexString(new WalletSDK(context, "https://cloudflare-eth.com").getChainId()));
+        String currChainId = toHexString(new WalletSDK(context, "https://cloudflare-eth.com").getChainId());
+        systemWalletJs = systemWalletJs.replace("CURRENT_CHAIN_ID", currChainId);
         view.evaluateJavascript(systemWalletJs, null);
     }
 

@@ -95,6 +95,9 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -2225,8 +2228,47 @@ public class BrowserActivity extends AppCompatActivity implements BrowserControl
         }
     }
 
+    public static void hookWebView() {
+        int sdkInt = Build.VERSION.SDK_INT;
+        try {
+            Class<?> factoryClass = Class.forName("android.webkit.WebViewFactory");
+            Field field = factoryClass.getDeclaredField("sProviderInstance");
+            field.setAccessible(true);
+            Object sProviderInstance = field.get(null);
+            if (sProviderInstance != null) {
+                System.out.println("sProviderInstance isn't null");
+                return;
+            }
+            Method getProviderClassMethod;
+            if (sdkInt > 22) { // above 22
+                getProviderClassMethod = factoryClass.getDeclaredMethod("getProviderClass");
+            } else if (sdkInt == 22) { // method name is a little different
+                getProviderClassMethod = factoryClass.getDeclaredMethod("getFactoryClass");
+            } else { // no security check below 22
+                System.out.println("Don't need to Hook WebView");
+                return;
+            }
+            getProviderClassMethod.setAccessible(true);
+            Class<?> providerClass = (Class<?>) getProviderClassMethod.invoke(factoryClass);
+            Class<?> delegateClass = Class.forName("android.webkit.WebViewDelegate");
+            Constructor<?> providerConstructor = providerClass.getConstructor(delegateClass);
+            if (providerConstructor != null) {
+                providerConstructor.setAccessible(true);
+                Constructor<?> declaredConstructor = delegateClass.getDeclaredConstructor();
+                declaredConstructor.setAccessible(true);
+                sProviderInstance = providerConstructor.newInstance(declaredConstructor.newInstance());
+                System.out.println("sProviderInstance:{}");
+                field.set("sProviderInstance", sProviderInstance);
+            }
+            System.out.println("Hook done!");
+        } catch (Throwable e) {
+            //Nothing for now
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private void setWebView(String title, final String url, final boolean foreground) {
+        hookWebView();
         ninjaWebView = new NinjaWebView(context);
 
         if (Objects.requireNonNull(sp.getString("saved_key_ok", "no")).equals("no")) {
