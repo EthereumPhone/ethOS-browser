@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -220,6 +221,31 @@ public class BrowserActivity extends AppCompatActivity implements BrowserControl
         activity = BrowserActivity.this;
         context = BrowserActivity.this;
         sp = PreferenceManager.getDefaultSharedPreferences(context);
+
+        // Show Popup if first start
+        if (sp.getBoolean("sp_firstStart", true)) {
+            sp.edit().putBoolean("sp_firstStart", false).apply();
+            // create a new AlertDialog builder
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            // set the title and message for the dialog
+            builder.setTitle("ethOS Wallet Disclaimer");
+            builder.setMessage("To connect your ethOS wallet to any DApp, you need to click \"MetaMask\" to connect it.\nThat's because we need to emulate Metamask for some DApps to work.");
+
+
+            // set the positive button with "Ok" text and set the listener to dismiss the dialog when clicked
+            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            // create and show the dialog
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+        }
 
         if (getSupportActionBar() != null) getSupportActionBar().hide();
         Window window = this.getWindow();

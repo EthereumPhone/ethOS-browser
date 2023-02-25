@@ -129,7 +129,6 @@ public class NinjaWebView extends WebView implements AlbumController {
         initAlbum();
 
         this.addJavascriptInterface(new AndroidEthereum(context, this), "AndroidEthereum");
-
     }
 
     @Override
