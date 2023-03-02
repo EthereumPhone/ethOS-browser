@@ -10,7 +10,7 @@ import java.math.BigInteger
 
 class WalletSDK(
     context: Context,
-    web3RPC: String = "https://rpc.ankr.com/eth"
+    web3RPC: String = "https://eth-mainnet.g.alchemy.com/v2/AH4YE6gtBXoZf2Um-Z8Xr-6noHSZocKq"
 ) {
 
     companion object {
@@ -70,8 +70,16 @@ class WalletSDK(
 
             CompletableFuture.runAsync {
                 val ethGetTransactionCount = web3j!!.ethGetTransactionCount(
-                    address, DefaultBlockParameterName.LATEST
+                    address, DefaultBlockParameterName.PENDING
                 ).sendAsync().get()
+
+                val pendingTxCount = ethGetTransactionCount.transactionCount.toInt()
+
+                val latestNonce = web3j!!.ethGetTransactionCount(
+                    address, DefaultBlockParameterName.LATEST
+                ).sendAsync().get().transactionCount.toInt()
+
+                val nonceToUse = if (pendingTxCount > latestNonce) pendingTxCount else latestNonce
 
                 if (gasPrice == null) {
                     gasPriceVAL = web3j?.ethGasPrice()?.sendAsync()?.get()?.gasPrice.toString()
@@ -84,7 +92,7 @@ class WalletSDK(
                     to,
                     value,
                     data,
-                    ethGetTransactionCount.transactionCount.toString(),
+                    nonceToUse.toString(),
                     gasPriceVAL,
                     gasAmount,
                     chainId
@@ -106,6 +114,9 @@ class WalletSDK(
                     completableFuture.complete(DECLINE)
                 } else {
                     val txResult = web3j!!.ethSendRawTransaction(result).sendAsync().get()
+                    if (txResult.hasError()) {
+                        println("Transaction error: ${txResult.error.message}")
+                    }
                     val txHash = txResult.transactionHash
                     completableFuture.complete(txHash)
                 }

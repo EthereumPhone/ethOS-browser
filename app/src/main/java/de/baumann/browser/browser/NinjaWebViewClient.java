@@ -480,7 +480,7 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                    resolve(sig)\n" +
                 "                } else if (request.method == 'eth_signTypedData_v4') {\n" +
                 "                    console.log(\"Typed Data V4: \", JSON.stringify(request.params[1]))\n" +
-                "                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params[1]))\n" +
+                "                    var sig = window.AndroidEthereum.signMessage(JSON.stringify(request.params[1]), \"eth_signTypedData\")\n" +
                 "                    resolve(sig)\n" +
                 "                } else if (request.method == 'eth_chainId') {\n" +
                 "                    var newestChainId = window.AndroidEthereum.getNewestChainId()\n" +

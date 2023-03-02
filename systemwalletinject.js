@@ -72,7 +72,7 @@ if (typeof window.ethereum !== 'undefined') {
                     resolve(sig)
                 } else if (request.method == 'eth_signTypedData_v4') {
                     console.log("Typed Data V4: ", JSON.stringify(request.params[1]))
-                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params[1]))
+                    var sig = window.AndroidEthereum.signMessage(JSON.stringify(request.params[1]), "eth_signTypedData")
                     resolve(sig)
                 } else if (request.method == 'eth_chainId') {
                     var newestChainId = window.AndroidEthereum.getNewestChainId()

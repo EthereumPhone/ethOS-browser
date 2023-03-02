@@ -161,7 +161,7 @@ class AndroidEthereum(
                         jsonObject.put("gasPrice", txObj.gasPrice)
                         jsonObject.put("nonce", txObj.nonce)
                         jsonObject.put("transactionIndex", if (txObj.transactionIndexRaw == null) null else txObj.transactionIndex)
-                        jsonObject.put("value", web3j.ethGetTransactionByHash(txHash).sendAsync().get().result.value)
+                        jsonObject.put("value", web3j.ethGetTransactionByHash(txHash).sendAsync().get().result.value.toString())
                     } catch (e: Exception) {
                         println("getTransactionByHash: error building json")
                         e.printStackTrace()
@@ -170,7 +170,7 @@ class AndroidEthereum(
                     println("getTransactionByHash: json built")
                     completableFuture.complete(jsonObject.toString())
                 } else {
-                    completableFuture.complete("0")
+                    completableFuture.complete("{}")
                 }
             }
             return completableFuture.get()
@@ -220,7 +220,7 @@ class AndroidEthereum(
                     jsonObject.put("logs", logsJsonArray)
                     completableFuture.complete(jsonObject.toString())
                 } else {
-                    completableFuture.complete("0")
+                    completableFuture.complete("{}")
                 }
             }
             return completableFuture.get()
