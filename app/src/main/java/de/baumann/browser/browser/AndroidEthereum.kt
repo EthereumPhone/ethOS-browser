@@ -320,15 +320,17 @@ class AndroidEthereum(
         jsonStr: String
     ): String {
         if (!enabled) {
-            return "0"
+            return "null"
         }
+        val estimateCallWeb3j = Web3j.build(HttpService(chainRPC))
+
         val json = JSONObject(jsonStr)
         val to = json.getString("to")
         val data = json.getString("data")
         val value = if (json.has("value")) json.getString("value") else "0x0"
         // Estimate gas
 
-        val gas = web3j.ethEstimateGas(
+        val gas = estimateCallWeb3j.ethEstimateGas(
             org.web3j.protocol.core.methods.request.Transaction.createFunctionCallTransaction(
                 walletSDK.getAddress(),
                 null,
@@ -341,7 +343,7 @@ class AndroidEthereum(
         ).send()
         if (gas.hasError()) {
             println("Error: ${gas.error.message}")
-            return "0x0"
+            return "null"
         }
         println(gas.amountUsed)
         return gas.amountUsed.toString()

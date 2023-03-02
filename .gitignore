@@ -3,7 +3,7 @@
 # Java class files
 # generated files
 gen/
-
+.DS_STORE
 # Local configuration file (sdk path, etc)
 local.properties
 
