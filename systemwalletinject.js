@@ -102,9 +102,13 @@ if (typeof window.ethereum !== 'undefined') {
                         resolve(null)
                     }
                     resolve(JSON.parse(jsonStr))
+                } else if (request.method == 'eth_getBlockByNumber') {
+                    var result = window.AndroidEthereum.getBlockByNumber(request.params[0], request.params[1])
+                    console.log("Block_RESULT: ", result)
+                    resolve(JSON.parse(result))
                 } else {
                     console.log("Method: ", request.method, " Params: ", JSON.stringify(request.params))
-                    reject(new Error("Not cool method: ", request.method))
+                    reject(new Error("Not cool method: " + JSON.stringify(request)))
                 }
             })
         },

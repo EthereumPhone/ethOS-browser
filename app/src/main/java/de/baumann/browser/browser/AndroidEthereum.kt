@@ -18,11 +18,15 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
+import org.web3j.protocol.core.methods.response.EthBlock
+import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult
 import org.web3j.protocol.core.methods.response.Transaction
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
 import java.lang.Long.parseLong
 import java.math.BigInteger
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.concurrent.CompletableFuture
 
 
@@ -303,16 +307,22 @@ class AndroidEthereum(
             return "0"
         }
         val json = JSONObject(jsonStr)
+        val from = if(json.has("from")) json.getString("from") else walletSDK.getAddress()
         val to = json.getString("to")
         val data = json.getString("data")
         val returnEthCall = web3j.ethCall(
             org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction(
-                walletSDK.getAddress(),
+                from,
                 to,
                 data
             ), DefaultBlockParameter.valueOf("latest")
         ).send()
-        return returnEthCall.result
+
+        if (returnEthCall.hasError()) {
+            throw Exception("Transaction execution failed: ${returnEthCall.error.message}")
+        }
+
+        return returnEthCall.result ?: throw Exception("Transaction execution failed: execution reverted")
     }
 
     @JavascriptInterface
@@ -347,6 +357,81 @@ class AndroidEthereum(
         }
         println(gas.amountUsed)
         return gas.amountUsed.toString()
+    }
+
+    @JavascriptInterface
+    fun getBlockByNumber(blockParamter: String, detailFlag: Boolean): String {
+        if (!enabled) {
+            return "0"
+        }
+        val blockStr = postEthGetBlockByNumber(blockParamter, detailFlag)
+        val block = JSONObject(blockStr)
+        return block.getJSONObject("result").toString()
+    }
+
+    fun postEthGetBlockByNumber(blockParamter: String, detailFlag: Boolean): String {
+        val url = URL(chainRPC)
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "POST"
+        connection.doOutput = true
+        connection.setRequestProperty("Content-Type", "application/json")
+
+        val data = """
+    {
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
+        "params": ["$blockParamter", $detailFlag],
+        "id": 1
+    }
+    """.trimIndent()
+
+        connection.outputStream.write(data.toByteArray())
+        connection.outputStream.flush()
+
+        val responseCode = connection.responseCode
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            val inputStream = connection.inputStream
+            val response = inputStream.bufferedReader().use { it.readText() }
+            return response
+        } else {
+            throw Exception("Failed to post eth_getBlockByNumber request. Response code: $responseCode")
+        }
+    }
+
+    /*
+    Method to turn EthBlock.Block into a json string
+     */
+    fun ethBlockToJson(block: EthBlock.Block): String {
+        val jsonObject = JSONObject()
+        jsonObject.put("number", block.number)
+        jsonObject.put("hash", block.hash)
+        jsonObject.put("parentHash", block.parentHash)
+        jsonObject.put("nonce", block.nonce)
+        jsonObject.put("sha3Uncles", block.sha3Uncles)
+        jsonObject.put("logsBloom", block.logsBloom)
+        jsonObject.put("transactionsRoot", block.transactionsRoot)
+        jsonObject.put("stateRoot", block.stateRoot)
+        jsonObject.put("receiptsRoot", block.receiptsRoot)
+        jsonObject.put("author", block.author)
+        jsonObject.put("miner", block.miner)
+        jsonObject.put("difficulty", block.difficulty)
+        jsonObject.put("totalDifficulty", block.totalDifficulty)
+        jsonObject.put("extraData", block.extraData)
+        jsonObject.put("size", block.size)
+        jsonObject.put("gasLimit", block.gasLimit)
+        jsonObject.put("gasUsed", block.gasUsed)
+        jsonObject.put("timestamp", block.timestamp)
+        // Add transactions but as an array and fill that array with the correct json from the TransactionResult
+        val transactions = JSONArray()
+        for (transaction in block.transactions) {
+            transactions.put(transaction.get().toString())
+        }
+        jsonObject.put("transactions", transactions)
+        jsonObject.put("uncles", block.uncles)
+        jsonObject.put("mixHash", block.mixHash)
+        jsonObject.put("nonce", block.nonce)
+        val outputString = jsonObject.toString()
+        return outputString
     }
 
     @JavascriptInterface

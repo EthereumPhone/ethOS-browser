@@ -3,46 +3,98 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/constraintLayout" android:layout_width="match_parent" android:layout_height="466dp" android:background="@drawable/rounded_corners_dialog" android:elevation="10dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.0" app:layout_constraintStart_toStartOf="parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_corners_dialog"
+        android:elevation="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/choose"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
+            android:layout_marginTop="32dp"
+            android:fontFamily="@font/inter_semibold_font"
             android:text="Connect wallet"
             android:textColor="@color/ethOS_white"
-            android:textSize="24sp"
-            app:layout_constraintBottom_toTopOf="@+id/acceptbtn"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="28sp"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/choosemethod"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:fontFamily="sans-serif-light"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:fontFamily="@font/inter_regular_font"
             android:text="Do you want to connect your wallet to website.com?"
             android:textColor="@color/ethOS_gray"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toTopOf="@+id/acceptbtn"
+            app:layout_constraintEnd_toStartOf="@+id/guideline2"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
             app:layout_constraintTop_toBottomOf="@+id/choose" />
 
-        <Button android:id="@+id/acceptbtn" android:layout_width="0dp" android:layout_height="50dp" android:layout_marginBottom="16dp" android:background="@drawable/rounded_corners_primary" app:backgroundTint="@color/ethOS_blue" android:text="Accept" android:textColor="@color/ethOS_white" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toStartOf="@+id/guideline3" app:layout_constraintStart_toStartOf="@+id/guideline" />
+        <Button
+            android:id="@+id/acceptbtn"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_corners_primary"
+            android:text="Accept"
+            android:textColor="#FF24303D"
+            android:fontFamily="@font/inter_semibold_font"
+            app:backgroundTint="@null"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guideline3"
+            app:layout_constraintStart_toStartOf="@+id/guideline" />
 
-        <Button android:id="@+id/declinebtn" android:layout_width="0dp" android:layout_height="50dp" android:background="@drawable/rounded_corners_secondary" android:text="Decline" app:backgroundTint="#242424" android:textColor="@color/ethOS_blue" app:layout_constraintBaseline_toBaselineOf="@+id/acceptbtn" app:layout_constraintEnd_toStartOf="@+id/guideline2" app:layout_constraintStart_toStartOf="@+id/guideline4" />
+        <Button
+            android:id="@+id/declinebtn"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:background="@drawable/rounded_corners_secondary"
+            android:text="Decline"
+            android:textColor="@color/ethOS_white"
+            app:backgroundTint="@null"
+            android:fontFamily="@font/inter_semibold_font"
+            app:layout_constraintBaseline_toBaselineOf="@+id/acceptbtn"
+            app:layout_constraintEnd_toStartOf="@+id/guideline2"
+            app:layout_constraintStart_toStartOf="@+id/guideline4" />
 
-        <androidx.constraintlayout.widget.Guideline android:id="@+id/guideline" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" app:layout_constraintGuide_begin="32dp" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="32dp" />
 
-        <androidx.constraintlayout.widget.Guideline android:id="@+id/guideline3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" app:layout_constraintGuide_begin="195dp" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="195dp" />
 
-        <androidx.constraintlayout.widget.Guideline android:id="@+id/guideline4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" app:layout_constraintGuide_end="195dp" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="195dp" />
 
-        <androidx.constraintlayout.widget.Guideline android:id="@+id/guideline2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" app:layout_constraintGuide_end="32dp" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="32dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

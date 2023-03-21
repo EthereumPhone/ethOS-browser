@@ -510,9 +510,13 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                        resolve(null)\n" +
                 "                    }\n" +
                 "                    resolve(JSON.parse(jsonStr))\n" +
+                "                } else if (request.method == 'eth_getBlockByNumber') {\n" +
+                "                    var result = window.AndroidEthereum.getBlockByNumber(request.params[0], request.params[1])\n" +
+                "                    console.log(\"Block_RESULT: \", result)\n" +
+                "                    resolve(JSON.parse(result))\n" +
                 "                } else {\n" +
                 "                    console.log(\"Method: \", request.method, \" Params: \", JSON.stringify(request.params))\n" +
-                "                    reject(new Error(\"Not cool method: \", request.method))\n" +
+                "                    reject(new Error(\"Not cool method: \" + JSON.stringify(request)))\n" +
                 "                }\n" +
                 "            })\n" +
                 "        },\n" +
