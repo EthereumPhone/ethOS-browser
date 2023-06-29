@@ -230,7 +230,7 @@ public class BrowserActivity extends AppCompatActivity implements BrowserControl
 
             // set the title and message for the dialog
             builder.setTitle("ethOS Wallet Disclaimer");
-            builder.setMessage("To connect your ethOS wallet to any DApp, you need to click \"MetaMask\" to connect it.\nThat's because we need to emulate Metamask for some DApps to work.");
+            builder.setMessage("To connect your ethOS wallet to any DApp, you need to select \"MetaMask\" to connect it.\nThat's because we need to emulate Metamask for some DApps to work.");
 
 
             // set the positive button with "Ok" text and set the listener to dismiss the dialog when clicked
