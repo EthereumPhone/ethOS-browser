@@ -16,6 +16,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import de.baumann.browser.R
 import org.json.JSONArray
 import org.json.JSONObject
+import org.web3j.abi.datatypes.Bool
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.response.EthBlock
@@ -34,7 +35,8 @@ class AndroidEthereum(
     private val context: Context,
     private val webView: WebView
 ) {
-    private var enabled = false
+
+    private var isEnabled = HashMap<String, Boolean>()
     private val chainRPC = "https://eth-mainnet.g.alchemy.com/v2/AH4YE6gtBXoZf2Um-Z8Xr-6noHSZocKq"
     var chainId: String
 
@@ -122,11 +124,15 @@ class AndroidEthereum(
 
     @JavascriptInterface
     fun getAddress(): String {
-        if (enabled) {
-            return walletSDK.getAddress()
-        } else {
-            return "0"
+        val completableFuture = CompletableFuture<String>()
+        (context as Activity).runOnUiThread {
+            if (isEnabled[getDomainName(webView.url!!)] == true) {
+                completableFuture.complete(walletSDK.getAddress())
+            } else {
+                completableFuture.complete("")
+            }
         }
+        return completableFuture.get()
     }
     fun tryToGetTxReceipt(txHash: String): TransactionReceipt? {
         val ethGetTransactionReceipt = web3j.ethGetTransactionReceipt(txHash).send()
@@ -142,7 +148,11 @@ class AndroidEthereum(
     }
     @JavascriptInterface
     fun getTransactionByHash(txHash: String): String {
-        if (enabled) {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled[getDomainName(webView.url!!)] == true)
+        }
+        if (compFut.get()) {
             val completableFuture = CompletableFuture<String>()
             CompletableFuture.runAsync {
                 println("getTransactionByHash: waiting for tx receipt")
@@ -185,7 +195,11 @@ class AndroidEthereum(
 
     @JavascriptInterface
     fun getTransactionReceipt(txHash: String): String {
-        if (enabled) {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled[getDomainName(webView.url!!)] == true)
+        }
+        if (compFut.get()) {
             val completableFuture = CompletableFuture<String>()
             CompletableFuture.runAsync {
                 println("getTransactionReceipt: waiting for tx receipt")
@@ -237,7 +251,11 @@ class AndroidEthereum(
     fun signTransaction(
         transaction: String
     ): String {
-        if (enabled) {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled[getDomainName(webView.url!!)] == true)
+        }
+        if (compFut.get()) {
             val txData = JSONObject(transaction)
             val txHash = walletSDK.sendTransaction(
                 to = txData.getString("to"),
@@ -258,7 +276,11 @@ class AndroidEthereum(
         message: String,
         method: String
     ): String {
-        if (!enabled) {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+        }
+        if (compFut.get()) {
             return "0"
         }
         return if (method == "personal_sign") {
@@ -285,7 +307,11 @@ class AndroidEthereum(
         method: String
     ): String {
         println("signTypedData: $typedData")
-        if (!enabled) {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+        }
+        if (compFut.get()) {
             return "0"
         }
         return walletSDK.signMessage(typedData, "eth_signTypedData").get()
@@ -293,7 +319,11 @@ class AndroidEthereum(
 
     @JavascriptInterface
     fun getBlocknumber(): String {
-        if (!enabled) {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+        }
+        if (compFut.get()) {
             return "0x0"
         }
         return "0x"+web3j.ethBlockNumber().send().blockNumber.toString(16)
@@ -303,7 +333,11 @@ class AndroidEthereum(
     fun ethCall(
         jsonStr: String
     ): String {
-        if (!enabled) {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+        }
+        if (compFut.get()) {
             return "0"
         }
         val json = JSONObject(jsonStr)
@@ -329,7 +363,11 @@ class AndroidEthereum(
     fun estimateGas(
         jsonStr: String
     ): String {
-        if (!enabled) {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+        }
+        if (compFut.get()) {
             return "null"
         }
         val estimateCallWeb3j = Web3j.build(HttpService(chainRPC))
@@ -361,7 +399,11 @@ class AndroidEthereum(
 
     @JavascriptInterface
     fun getBlockByNumber(blockParamter: String, detailFlag: Boolean): String {
-        if (!enabled) {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+        }
+        if (compFut.get()) {
             return "0"
         }
         val blockStr = postEthGetBlockByNumber(blockParamter, detailFlag)
@@ -436,7 +478,11 @@ class AndroidEthereum(
 
     @JavascriptInterface
     fun switchChain(chainId: String): String {
-        if (!enabled) {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+        }
+        if (compFut.get()) {
             return "0x1"
         }
         val newChainId = Integer.parseInt(hexToBigInteger(chainId))
@@ -474,7 +520,7 @@ class AndroidEthereum(
         }
 
         acceptButton.setOnClickListener {
-            enabled = true
+            isEnabled[getDomainName(webView.url!!)] = true
             (context as Activity).runOnUiThread {
                 view.removeView(mainView)
             }
@@ -482,7 +528,7 @@ class AndroidEthereum(
         }
 
         declineButton.setOnClickListener {
-            enabled = false
+            isEnabled[getDomainName(webView.url!!)] = false
             (context as Activity).runOnUiThread {
                 view.removeView(mainView)
             }
