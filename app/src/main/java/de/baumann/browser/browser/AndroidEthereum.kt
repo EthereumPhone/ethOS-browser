@@ -4,13 +4,12 @@ import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
 import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
@@ -20,11 +19,9 @@ import androidx.core.app.NotificationCompat
 import de.baumann.browser.R
 import org.json.JSONArray
 import org.json.JSONObject
-import org.web3j.abi.datatypes.Bool
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.response.EthBlock
-import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult
 import org.web3j.protocol.core.methods.response.Transaction
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
@@ -629,6 +626,8 @@ class AndroidEthereum(
 
         return completableFuture.get()
     }
+
+
 
     /**
      * Function to convert hex string into BigInteger string

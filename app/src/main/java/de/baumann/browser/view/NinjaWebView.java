@@ -271,7 +271,7 @@ public class NinjaWebView extends WebView implements AlbumController {
         adBlock = sp.getBoolean(profile + "_adBlock", true);
         saveData = sp.getBoolean(profile + "_saveData", true);
         camera = sp.getBoolean(profile + "_camera", true);
-        initCookieManager(url);
+        //initCookieManager(url);
         profile = profileOriginal;
 
         webSettings.setAllowFileAccess(true);

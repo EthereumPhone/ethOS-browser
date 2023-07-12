@@ -29,19 +29,6 @@
             android:key="sp_search_engine"
             android:title="@string/setting_title_search_engine" />
 
-        <de.baumann.browser.preferences.EditTextSwitchPreference
-            android:key="sp_search_engine_custom"
-            android:selectable="true"
-            android:title="@string/setting_title_searchEngine"
-            app:editTextSwitchKey="searchEngineSwitch"
-            app:useSimpleSummaryProvider="true" />
-
-        <de.baumann.browser.preferences.EditTextSwitchPreference
-            android:key="sp_userAgent"
-            android:selectable="true"
-            android:title="@string/setting_title_userAgent"
-            app:editTextSwitchKey="userAgentSwitch"
-            app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 
