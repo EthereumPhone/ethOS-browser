@@ -5,40 +5,40 @@
 
     <PreferenceCategory android:title="@string/setting_title_behavior">
 
-        <CheckBoxPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:icon="@drawable/icon_screen"
             android:key="sp_screenOn"
             android:summary="@string/setting_title_screenOn" />
 
-        <CheckBoxPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:icon="@drawable/icon_audio"
             android:key="sp_audioBackground"
             android:summary="@string/setting_title_audioBackground" />
 
-        <CheckBoxPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="sp_close_browser_confirm"
             android:summary="@string/setting_title_confirm_exit" />
 
-        <CheckBoxPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="sp_close_tab_confirm"
             android:summary="@string/setting_title_confirm_tab_close" />
 
-        <CheckBoxPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="sp_tabBackground"
             android:summary="@string/main_menu_new_tab" />
 
-        <CheckBoxPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="sp_reloadTabs"
             android:summary="@string/setting_summary_tabsReload"
             android:title="@string/setting_title_tabsReload" />
 
-        <CheckBoxPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="sp_restoreTabs"
             android:summary="@string/setting_summary_tabsRestore"
@@ -48,10 +48,15 @@
 
     <PreferenceCategory android:title="@string/setting_title_userInterface">
 
-        <CheckBoxPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="hideToolbar"
             android:summary="@string/setting_title_hideToolbar" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="useDynamicColor"
+            android:summary="@string/setting_theme_wallpaper" />
 
         <de.baumann.browser.preferences.ListSwitchPreference
             android:defaultValue="3"
@@ -63,14 +68,6 @@
             app:listSwitchKey="start_tabStart"
             app:listSwitchKeyDefaultValue="false"
             app:useSimpleSummaryProvider="true" />
-
-        <ListPreference
-            android:defaultValue="2"
-            android:entries="@array/setting_entries_night"
-            android:entryValues="@array/setting_values_night"
-            android:key="nightMode"
-            android:title="@string/menu_nightView"
-            android:icon="@drawable/icon_night"/>
 
         <ListPreference
             android:defaultValue="1"

@@ -50,10 +50,10 @@ public class Settings_Delete extends AppCompatActivity {
                 .replace(R.id.content_frame, new Fragment_settings_Delete())
                 .commit();
 
-        Button button = findViewById(R.id.whitelist_add);
+        Button button = findViewById(R.id.profileListAdd);
         button.setOnClickListener(v -> {
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
-            builder.setIcon(R.drawable.icon_alert);
+            builder.setIcon(R.drawable.icon_delete);
             builder.setTitle(R.string.menu_delete);
             builder.setMessage(R.string.hint_database);
             builder.setPositiveButton(R.string.app_ok, (dialog, whichButton) -> {

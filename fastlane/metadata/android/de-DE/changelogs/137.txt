@@ -1,0 +1,26 @@
+### v 9.6
+
+- removed: redirection for Instagram
+- fix: Redirect error from YouTube #991
+- fix: loading images fit screen width
+- fix: cookie manager, when going back in history
+- fix: buttons not reachable on some dialogs
+- fix: Auth-request dialog
+- fix: download dialog
+- fix: startsite is now the wiki #997
+- fix: crash when open downloads, while default file manager not installed
+- fix: issues with the file name when downloading thanks to @Bnyro
+- fix: kill the app on pressing quit thanks to @Bnyro thanks to @Bnyro
+- fix: theme settings
+- fix: suppress DRM notice #1019
+- fix: profile icons - red for attached profiles #999
+- fix: Youtube videos in full screen mode cropped #1015
+- fix: Twitter-to-Nitter redirector matches some unrelated urls #1022
+- fix: & not escaped in search URL #959
+- fix: lint issues
+- new: circular progress - press to stop loading
+- new: Swedish translation
+- new: material dialogs in the preferences thanks to @Bnyro
+- new: monochrome icon for Android 13+ thanks to @Bnyro
+- new: custom redirects thanks to @Bnyro
+- new: Custom error pages  thanks to @Bnyro

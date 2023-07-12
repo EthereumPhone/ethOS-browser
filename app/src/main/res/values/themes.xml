@@ -27,9 +27,12 @@
         <item name="colorOnSurfaceInverse">@color/md_theme_light_inverseOnSurface</item>
         <item name="colorSurfaceInverse">@color/md_theme_light_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_light_primaryInverse</item>
+        <item name="switchPreferenceCompatStyle">@style/MaterialPreferenceSwitch</item>
     </style>
 
     <style name="AppTheme_wallpaper" parent="Theme.Material3.DynamicColors.DayNight" />
+    <style name="AppTheme_wallpaper_day" parent="Theme.Material3.DynamicColors.Light" />
+    <style name="AppTheme_wallpaper_night" parent="Theme.Material3.DynamicColors.Dark" />
 
     <style name="AppTheme_OLED" parent="Theme.Material3.Dark">
         <item name="elevationOverlayColor">#000000</item>
@@ -59,6 +62,7 @@
         <item name="colorOnSurfaceInverse">#000000</item>
         <item name="colorSurfaceInverse">#ffffff</item>
         <item name="colorPrimaryInverse">#ffffff</item>
+        <item name="switchPreferenceCompatStyle">@style/MaterialPreferenceSwitch</item>
     </style>
 
     <style name="AppTheme_day" parent="Theme.Material3.Light.NoActionBar">
@@ -88,6 +92,7 @@
         <item name="colorOnSurfaceInverse">@color/md_theme_light_inverseOnSurface</item>
         <item name="colorSurfaceInverse">@color/md_theme_light_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_light_primaryInverse</item>
+        <item name="switchPreferenceCompatStyle">@style/MaterialPreferenceSwitch</item>
     </style>
 
     <style name="AppTheme_night" parent="Theme.Material3.Dark.NoActionBar">
@@ -117,6 +122,7 @@
         <item name="colorOnSurfaceInverse">@color/md_theme_dark_inverseOnSurface</item>
         <item name="colorSurfaceInverse">@color/md_theme_dark_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_dark_primaryInverse</item>
+        <item name="switchPreferenceCompatStyle">@style/MaterialPreferenceSwitch</item>
     </style>
 
 

@@ -17,6 +17,7 @@
     <string name="album_title_home">Home</string>
     <string name="album_title_tab">Opened Tabs</string>
     <string name="search_hint">Search</string>
+    <string name="create_new">New</string>
 
     <string name="color_red">Red</string>
     <string name="color_pink">Pink</string>
@@ -56,6 +57,7 @@
     <string name="menu_save_pdf">Save as PDF</string>
     <string name="menu_shareClipboard">Copy to clipboard</string>
     <string name="menu_other_searchSite">Search on site</string>
+    <string name="link_you_copied">Link you copied</string>
 
     <!-- Dialog -->
     <string name="dialog_title_hint">Title:</string>
@@ -76,6 +78,7 @@
 
     <!-- browser setting -->
     <string name="setting_title_browser">Browser Settings</string>
+    <string name="setting_title_general">General</string>
 
     <string name="setting_title_search_engine">Search Engine</string>
     <string name="setting_summary_search_engine_google">Google</string>
@@ -96,7 +99,9 @@
     <string name="privacy_redirect">Redirect</string>
     <string name="privacy_redirect_twitter">Twitter</string>
     <string name="privacy_redirect_youTube">YouTube</string>
-    <string name="privacy_redirect_inst">Instagram</string>
+    <string name="custom_redirects">Custom redirects</string>
+    <string name="source">Source</string>
+    <string name="target">Target</string>
 
     <string name="setting_title_save_data">Request \'Save Data\'</string>
 
@@ -159,6 +164,7 @@
     <string name="setting_title_searchEngine">Custom search engine</string>
 
     <string name="setting_title_userAgent">Custom user agent</string>
+    <string name="setting_title_clipboard_record">Clipboard record</string>
 
     <string name="setting_title_fingerPrint">Fingerprint protection</string>
     <string name="setting_theme">Theme</string>
@@ -245,6 +251,7 @@
     <string name="menu_restart">Restart and reload tabs</string>
     <string name="setting_title_screenOn">Keep screen on</string>
     <string name="setting_title_audioBackground">Play audio on background</string>
+
 
     <!-- License changelog -->
 

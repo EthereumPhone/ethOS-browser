@@ -14,6 +14,7 @@
     <string name="album_title_home">Start</string>
     <string name="album_title_tab">Tabs</string>
     <string name="search_hint">Suche</string>
+    <string name="create_new">Neu</string>
     <string name="color_red">Rot</string>
     <string name="color_pink">Pink</string>
     <string name="color_purple">Lila</string>
@@ -48,6 +49,7 @@
     <string name="menu_save_pdf">Als PDF speichern</string>
     <string name="menu_shareClipboard">In Zwischenablage kopieren</string>
     <string name="menu_other_searchSite">Auf Website suchen</string>
+    <string name="link_you_copied">Kopierter Link</string>
     <!-- Dialog -->
     <string name="dialog_title_hint">Titel:</string>
     <string name="dialog_URL_hint">URL:</string>
@@ -64,6 +66,7 @@
     <string name="setting_label">Einstellungen</string>
     <!-- browser setting -->
     <string name="setting_title_browser">Browser-Einstellungen</string>
+    <string name="setting_title_general">Allgemein</string>
     <string name="setting_title_search_engine">Suchmaschine</string>
     <string name="setting_summary_search_engine_google">Google</string>
     <string name="setting_summary_search_engine_duckduckgo">DuckDuckGo</string>
@@ -80,7 +83,9 @@
     <string name="privacy_redirect">Umleitung</string>
     <string name="privacy_redirect_twitter">Twitter</string>
     <string name="privacy_redirect_youTube">YouTube</string>
-    <string name="privacy_redirect_inst">Instagram</string>
+    <string name="custom_redirects">Eigene Weiterleitungen</string>
+    <string name="source">Quelle</string>
+    <string name="target">Ziel</string>
     <string name="setting_title_save_data">\"Daten sparen\" verlangen</string>
     <string name="setting_title_profiles">Profile</string>
     <string name="setting_title_profiles_edit">Profile bearbeiten</string>
@@ -127,6 +132,7 @@
     <string name="setting_title_reload">Nach unten ziehen, um neu zu laden</string>
     <string name="setting_title_searchEngine">Nutzerdefinierte Suchmaschine</string>
     <string name="setting_title_userAgent">Eigener Useragent</string>
+    <string name="setting_title_clipboard_record">Zwischenablage</string>
     <string name="setting_title_fingerPrint">Fingerabdruck-Schutz</string>
     <string name="setting_theme">Stil</string>
     <string name="setting_theme_system">System</string>

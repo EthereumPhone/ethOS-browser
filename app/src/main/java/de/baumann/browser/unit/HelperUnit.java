@@ -39,7 +39,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -49,6 +51,9 @@ import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.res.ResourcesCompat;
@@ -70,6 +75,7 @@ import de.baumann.browser.R;
 import de.baumann.browser.activity.BrowserActivity;
 import de.baumann.browser.browser.BrowserController;
 import de.baumann.browser.browser.DataURIParser;
+import de.baumann.browser.database.FaviconHelper;
 import de.baumann.browser.view.GridItem;
 import de.baumann.browser.view.NinjaToast;
 import de.baumann.browser.view.NinjaWebView;
@@ -126,7 +132,7 @@ public class HelperUnit {
         }
     }
 
-    public static void saveAs(final Activity activity, final String url) {
+    public static void saveAs(final Activity activity, String titleMenu, final String url, final String name, Dialog dialogParent) {
 
         try {
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
@@ -143,14 +149,31 @@ public class HelperUnit {
             editTop.setHint(activity.getString(R.string.dialog_title_hint));
             editBottom.setHint(activity.getString(R.string.dialog_extension_hint));
 
-            String filename = URLUtil.guessFileName(url, null, null);
-            editTop.setText(HelperUnit.fileName(url));
-
+            String filename = name != null ? name : URLUtil.guessFileName(url, null, null);
             String extension = filename.substring(filename.lastIndexOf("."));
+            String prefix = filename.substring(0, filename.lastIndexOf("."));
+
+            editTop.setText(prefix);
             if (extension.length() <= 8) editBottom.setText(extension);
 
+            LinearLayout textGroupEdit = dialogView.findViewById(R.id.textGroupEdit);
+            TextView menuURLEdit = dialogView.findViewById(R.id.menuURLEdit);
+            menuURLEdit.setText(url);
+            menuURLEdit.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+            menuURLEdit.setSingleLine(true);
+            menuURLEdit.setMarqueeRepeatLimit(1);
+            menuURLEdit.setSelected(true);
+            textGroupEdit.setOnClickListener(v -> {
+                menuURLEdit.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+                menuURLEdit.setSingleLine(true);
+                menuURLEdit.setMarqueeRepeatLimit(1);
+                menuURLEdit.setSelected(true);
+            });
+            TextView menuTitleEdit = dialogView.findViewById(R.id.menuTitleEdit);
+            menuTitleEdit.setText(titleMenu);
+            FaviconHelper.setFavicon(activity, dialogView, null, R.id.menu_icon, R.drawable.icon_save_as);
+
             builder.setView(dialogView);
-            builder.setTitle(R.string.menu_save_as);
 
             AlertDialog dialog = builder.create();
             dialog.show();
@@ -168,23 +191,39 @@ public class HelperUnit {
                 String extension1 = editBottom.getText().toString().trim();
                 String filename1 = title + extension1;
 
-                if (title.isEmpty() || extension1.isEmpty() || !extension1.startsWith(".")) {
+                if (title.isEmpty() || !extension1.startsWith(".")) {
                     NinjaToast.show(activity, activity.getString(R.string.toast_input_empty));
                 } else {
                     if (BackupUnit.checkPermissionStorage(activity)) {
-                        Uri source = Uri.parse(url);
-                        DownloadManager.Request request = new DownloadManager.Request(source);
-                        request.addRequestHeader("List_protected", CookieManager.getInstance().getCookie(url));
-                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //Notify client once download is completed!
-                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename1);
-                        DownloadManager dm = (DownloadManager) activity.getSystemService(DOWNLOAD_SERVICE);
-                        assert dm != null;
-                        dm.enqueue(request);
+                        try {
+                            Uri source = Uri.parse(url);
+                            DownloadManager.Request request = new DownloadManager.Request(source);
+                            String cookies = CookieManager.getInstance().getCookie(url);
+                            request.addRequestHeader("cookie", cookies);
+                            request.addRequestHeader("Accept", "text/html, application/xhtml+xml, *" + "/" + "*");
+                            request.addRequestHeader("Accept-Language", "en-US,en;q=0.7,he;q=0.3");
+                            request.addRequestHeader("Referer", url);
+                            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //Notify client once download is completed!
+                            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename1);
+                            DownloadManager dm = (DownloadManager) activity.getSystemService(DOWNLOAD_SERVICE);
+                            assert dm != null;
+                            dm.enqueue(request);
+                        } catch (Exception e) {
+                            System.out.println("Error Downloading File: " + e);
+                            Toast.makeText(activity, activity.getString(R.string.app_error) + e.toString().substring(e.toString().indexOf(":")), Toast.LENGTH_LONG).show();
+                            e.printStackTrace();
+                        }
+
                     } else {
                         BackupUnit.requestPermission(activity);
                     }
                     HelperUnit.hideSoftKeyboard(editBottom, activity);
-                    dialog.cancel();
+                    try {
+                        dialog.cancel();
+                    } catch (Exception e) {
+                        Log.i("FOSS Browser", "shouldOverrideUrlLoading Exception:" + e);
+                    }
+                    dialogParent.cancel();
                 }
             });
         } catch (Exception e) {
@@ -249,22 +288,37 @@ public class HelperUnit {
 
     public static void initTheme(Activity context) {
         sp = PreferenceManager.getDefaultSharedPreferences(context);
-        switch (Objects.requireNonNull(sp.getString("sp_theme", "1"))) {
-            case "2":
-                context.setTheme(R.style.AppTheme_day);
-                break;
-            case "3":
-                context.setTheme(R.style.AppTheme_night);
-                break;
-            case "4":
-                context.setTheme(R.style.AppTheme_wallpaper);
-                break;
-            case "5":
-                context.setTheme(R.style.AppTheme_OLED);
-                break;
-            default:
-                context.setTheme(R.style.AppTheme);
-                break;
+
+        if (sp.getBoolean("useDynamicColor", true)) {
+            switch (Objects.requireNonNull(sp.getString("sp_theme", "1"))) {
+                case "2":
+                    context.setTheme(R.style.AppTheme_wallpaper_day);
+                    break;
+                case "3":
+                    context.setTheme(R.style.AppTheme_wallpaper_night);
+                    break;
+                case "5":
+                    context.setTheme(R.style.AppTheme_OLED);
+                    break;
+                default:
+                    context.setTheme(R.style.AppTheme_wallpaper);
+                    break;
+            }
+        } else {
+            switch (Objects.requireNonNull(sp.getString("sp_theme", "1"))) {
+                case "2":
+                    context.setTheme(R.style.AppTheme_day);
+                    break;
+                case "3":
+                    context.setTheme(R.style.AppTheme_night);
+                    break;
+                case "5":
+                    context.setTheme(R.style.AppTheme_OLED);
+                    break;
+                default:
+                    context.setTheme(R.style.AppTheme);
+                    break;
+            }
         }
     }
 
@@ -317,7 +371,7 @@ public class HelperUnit {
         }
     }
 
-    public static void saveDataURI(Activity activity, DataURIParser dataUriParser) {
+    public static void saveDataURI(Activity activity, String titleMenu, String url, DataURIParser dataUriParser, Dialog dialogParent) {
 
         byte[] imagedata = dataUriParser.getImagedata();
         String filename = dataUriParser.getFilename();
@@ -336,6 +390,23 @@ public class HelperUnit {
         if (extension.length() <= 8) {
             editBottom.setText(extension);
         }
+
+        LinearLayout textGroupEdit = dialogView.findViewById(R.id.textGroupEdit);
+        TextView menuURLEdit = dialogView.findViewById(R.id.menuURLEdit);
+        menuURLEdit.setText(url);
+        menuURLEdit.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+        menuURLEdit.setSingleLine(true);
+        menuURLEdit.setMarqueeRepeatLimit(1);
+        menuURLEdit.setSelected(true);
+        textGroupEdit.setOnClickListener(v -> {
+            menuURLEdit.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+            menuURLEdit.setSingleLine(true);
+            menuURLEdit.setMarqueeRepeatLimit(1);
+            menuURLEdit.setSelected(true);
+        });
+        TextView menuTitleEdit = dialogView.findViewById(R.id.menuTitleEdit);
+        menuTitleEdit.setText(titleMenu);
+        FaviconHelper.setFavicon(activity, dialogView, null, R.id.menu_icon, R.drawable.icon_save_as);
 
         builder.setView(dialogView);
         builder.setTitle(R.string.menu_save_as);
@@ -356,7 +427,7 @@ public class HelperUnit {
             String extension1 = editBottom.getText().toString().trim();
             String filename1 = title + extension1;
 
-            if (title.isEmpty() || extension1.isEmpty() || !extension1.startsWith(".")) {
+            if (title.isEmpty() || !extension1.startsWith(".")) {
                 NinjaToast.show(activity, activity.getString(R.string.toast_input_empty));
             } else {
                 if (BackupUnit.checkPermissionStorage(activity)) {
@@ -373,6 +444,7 @@ public class HelperUnit {
                 }
                 HelperUnit.hideSoftKeyboard(editBottom, activity);
                 dialog.cancel();
+                dialogParent.cancel();
             }
         });
     }
@@ -401,6 +473,10 @@ public class HelperUnit {
         ImageView imageView = dialog.findViewById(android.R.id.icon);
         if (imageView != null) imageView.setColorFilter(color, PorterDuff.Mode.SRC_IN);
         Objects.requireNonNull(dialog.getWindow()).setGravity(Gravity.BOTTOM);
+        if (sp.getString("sp_theme", "1").equals("5")) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_border);
+        }
     }
 
     public static void triggerRebirth(Context context) {

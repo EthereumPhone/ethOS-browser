@@ -4,14 +4,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import java.util.Objects;
 
 import de.baumann.browser.R;
+import de.baumann.browser.preferences.BasePreferenceFragment;
 
-public class Fragment_settings_Profile extends PreferenceFragmentCompat {
+public class Fragment_settings_Profile extends BasePreferenceFragment {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {

@@ -13,7 +13,7 @@ import androidx.preference.ListPreference;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
-import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 import de.baumann.browser.R;
 import de.baumann.browser.unit.HelperUnit;
@@ -42,7 +42,7 @@ public class ListSwitchPreference extends ListPreference {
 
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         final ViewGroup rootView;
-        final SwitchMaterial onOffSwitch;
+        final MaterialSwitch onOffSwitch;
         final CompoundButton.OnCheckedChangeListener checkedChangeListener;
         super.onBindViewHolder(holder);
 
@@ -55,7 +55,7 @@ public class ListSwitchPreference extends ListPreference {
             );
             params.setMargins(0, 0, HelperUnit.convertDpToPixel(5f, getContext()),0);
 
-            onOffSwitch = new SwitchMaterial(getContext());
+            onOffSwitch = new MaterialSwitch(getContext());
             onOffSwitch.setLayoutParams(params);
             rootView.addView(onOffSwitch);
             switchAttached = true;

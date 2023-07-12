@@ -15,7 +15,7 @@ import androidx.preference.EditTextPreference;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
-import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 import de.baumann.browser.R;
 import de.baumann.browser.unit.HelperUnit;
@@ -43,7 +43,7 @@ public class EditTextSwitchPreference extends EditTextPreference {
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         final ViewGroup rootView;
-        final SwitchMaterial onOffSwitch;
+        final MaterialSwitch onOffSwitch;
         final CompoundButton.OnCheckedChangeListener checkedChangeListener;
         Context context = getContext();
         super.onBindViewHolder(holder);
@@ -57,7 +57,7 @@ public class EditTextSwitchPreference extends EditTextPreference {
             );
             params.setMargins(0, 0, HelperUnit.convertDpToPixel(5f, getContext()),0);
 
-            onOffSwitch = new SwitchMaterial(context);
+            onOffSwitch = new MaterialSwitch(context);
             onOffSwitch.setLayoutParams(params);
             rootView.addView(onOffSwitch);
             switchAttached = true;

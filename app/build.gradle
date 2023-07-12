@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -13,9 +13,9 @@ android {
     defaultConfig {
         applicationId "de.baumann.browser"
         minSdkVersion 27
-        targetSdkVersion 32
-        versionCode 151
-        versionName "9.7.4"
+        targetSdkVersion 33
+        versionCode 139
+        versionName "9.11"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
     }
@@ -36,11 +36,12 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.4.2'
-    implementation 'com.google.android.material:material:1.7.0-alpha02'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0-beta01'
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
-    implementation 'androidx.webkit:webkit:1.4.0'
+
+    implementation 'androidx.webkit:webkit:1.6.0'
 
     // Web3j
     implementation 'org.web3j:core:4.8.8-android'

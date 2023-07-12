@@ -7,14 +7,14 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import de.baumann.browser.R;
+import de.baumann.browser.preferences.BasePreferenceFragment;
 import de.baumann.browser.unit.HelperUnit;
 
-public class Fragment_settings_Delete extends PreferenceFragmentCompat {
+public class Fragment_settings_Delete extends BasePreferenceFragment {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -30,7 +30,7 @@ public class Fragment_settings_Delete extends PreferenceFragmentCompat {
         sp_deleteDatabase.setOnPreferenceClickListener(preference -> {
             final SharedPreferences sp = getPreferenceScreen().getSharedPreferences();
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
-            builder.setIcon(R.drawable.icon_alert);
+            builder.setIcon(R.drawable.icon_delete);
             builder.setTitle(R.string.menu_delete);
             builder.setMessage(R.string.hint_database);
             builder.setPositiveButton(R.string.app_ok, (dialog, whichButton) -> {

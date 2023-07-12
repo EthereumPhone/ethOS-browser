@@ -12,10 +12,80 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="24dp"
-        android:paddingTop="20dp"
-        android:paddingEnd="24dp"
-        tools:ignore="Autofill">
+        android:paddingStart="15dp"
+        android:paddingTop="15dp"
+        android:paddingEnd="15dp" >
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Material3.CardView.Filled"
+            android:id="@+id/albumCardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:layout_marginBottom="10dp" >
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardView"
+                    style="@style/Widget.Material3.CardView.Filled"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="10dp"
+                    android:backgroundTint="@android:color/transparent"
+                    app:cardCornerRadius="3dp">
+
+                    <ImageView
+                        android:id="@+id/menu_icon"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:scaleType="fitCenter"
+                        tools:ignore="ContentDescription" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textGroupEdit"
+                    android:orientation="vertical"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_toEndOf="@id/cardView">
+
+                    <TextView
+                        android:id="@+id/menuTitleEdit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="2dp"
+                        android:ellipsize="end"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/menuURLEdit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:textAppearance="?attr/textAppearanceBodySmall"/>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editTopLayout"
@@ -28,7 +98,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionNext"
-                android:inputType="text" />
+                android:inputType="text"
+                android:importantForAutofill="yes" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -43,7 +114,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionDone"
-                android:inputType="textUri" />
+                android:inputType="textUri"
+                android:importantForAutofill="yes" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -51,28 +123,10 @@
             android:id="@+id/editButtonsLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
             android:layout_marginTop="10dp"
-            android:layout_marginEnd="20dp"
             android:gravity="center"
             android:orientation="horizontal"
             android:visibility="gone">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/editIcon"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_marginEnd="10dp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/editNightMode"
-                style="@style/Widget.Material3.Chip.Suggestion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:chipIcon="@drawable/icon_night"
-                app:chipIconEnabled="true"
-                app:textEndPadding="0dp"
-                app:textStartPadding="0dp" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/editDesktopMode"
@@ -83,6 +137,13 @@
                 app:chipIconEnabled="true"
                 app:textEndPadding="0dp"
                 app:textStartPadding="0dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/editIcon"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:layout_marginStart="10dp"
+                style="@style/Widget.Material3.CardView.Outlined" />
 
         </LinearLayout>
 

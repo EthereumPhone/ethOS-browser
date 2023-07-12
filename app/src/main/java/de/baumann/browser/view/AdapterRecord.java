@@ -62,9 +62,17 @@ public class AdapterRecord extends ArrayAdapter<Record> {
 
         Record record = list.get(position);
         long filter = record.getIconColor();
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd", Locale.getDefault());
+        String text;
+
+        if (record.getTime() > 1) {
+            text = sdf.format(record.getTime()) + ": " + record.getURL();
+        } else {
+            text = record.getURL();
+        }
+
         holder.title.setText(record.getTitle());
-        holder.time.setText(sdf.format(record.getTime()));
+        holder.time.setText(text);
 
         if (filter == 11) {
             holder.cardView.setCardBackgroundColor(ResourcesCompat.getColor(context.getResources(), R.color.red, null));

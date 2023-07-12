@@ -14,6 +14,7 @@
     <string name="album_title_home">Почетна страница</string>
     <string name="album_title_tab">Отворени језичци</string>
     <string name="search_hint">Претрага</string>
+    <string name="create_new">Ново</string>
     <string name="color_red">Црвена</string>
     <string name="color_pink">Ружичаста</string>
     <string name="color_purple">Љубичаста</string>
@@ -48,6 +49,7 @@
     <string name="menu_save_pdf">Сачувај као PDF датотеку</string>
     <string name="menu_shareClipboard">Копирај</string>
     <string name="menu_other_searchSite">Претражи на страници</string>
+    <string name="link_you_copied">Веза коју сте копирали</string>
     <!-- Dialog -->
     <string name="dialog_title_hint">Наслов:</string>
     <string name="dialog_URL_hint">УРЛ:</string>
@@ -64,6 +66,7 @@
     <string name="setting_label">Подешавања</string>
     <!-- browser setting -->
     <string name="setting_title_browser">Подешавања прегледача</string>
+    <string name="setting_title_general">Опште</string>
     <string name="setting_title_search_engine">Претраживач</string>
     <string name="setting_summary_search_engine_google">Гугл</string>
     <string name="setting_summary_search_engine_duckduckgo">Дакдакго</string>
@@ -80,7 +83,9 @@
     <string name="privacy_redirect">Преусмерите</string>
     <string name="privacy_redirect_twitter">Твитер</string>
     <string name="privacy_redirect_youTube">YouTube</string>
-    <string name="privacy_redirect_inst">Инстаграм</string>
+    <string name="custom_redirects">Прилагођена преусмеравања</string>
+    <string name="source">Извор</string>
+    <string name="target">Циљ</string>
     <string name="setting_title_save_data">Захтевај уштеду података</string>
     <string name="setting_title_profiles">Профили</string>
     <string name="setting_title_profiles_edit">Уредите профиле</string>
@@ -127,6 +132,7 @@
     <string name="setting_title_reload">Повуците надоле да бисте поново учитали</string>
     <string name="setting_title_searchEngine">Прилагођени погон за претраживач</string>
     <string name="setting_title_userAgent">Прилагођени кориснички агент</string>
+    <string name="setting_title_clipboard_record">Clipboard record</string>
     <string name="setting_title_fingerPrint">Заштита отиска прста</string>
     <string name="setting_theme">Тема</string>
     <string name="setting_theme_system">Система</string>

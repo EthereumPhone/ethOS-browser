@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App -->
+    <string name="app_name">Threeブラウザ</string>
     <string name="app_ok">OK</string>
     <string name="app_help">ヘルプ</string>
     <string name="app_cancel">中止</string>
@@ -14,6 +15,7 @@
     <string name="album_title_home">ホーム</string>
     <string name="album_title_tab">開かれたタブ</string>
     <string name="search_hint">検索</string>
+    <string name="create_new">新規</string>
     <string name="color_red">赤</string>
     <string name="color_pink">ピンク</string>
     <string name="color_purple">紫</string>
@@ -48,6 +50,7 @@
     <string name="menu_save_pdf">PDF として保存</string>
     <string name="menu_shareClipboard">クリップボードにコピー</string>
     <string name="menu_other_searchSite">サイト内の検索</string>
+    <string name="link_you_copied">リンクがコピーされました</string>
     <!-- Dialog -->
     <string name="dialog_title_hint">タイトル:</string>
     <string name="dialog_URL_hint">URL:</string>
@@ -64,6 +67,7 @@
     <string name="setting_label">設定</string>
     <!-- browser setting -->
     <string name="setting_title_browser">ブラウザ設定</string>
+    <string name="setting_title_general">一般</string>
     <string name="setting_title_search_engine">検索エンジン</string>
     <string name="setting_summary_search_engine_google">Google</string>
     <string name="setting_summary_search_engine_duckduckgo">DuckDuckGo</string>
@@ -80,7 +84,9 @@
     <string name="privacy_redirect">リダイレクト</string>
     <string name="privacy_redirect_twitter">Twitter</string>
     <string name="privacy_redirect_youTube">YouTube</string>
-    <string name="privacy_redirect_inst">Instagram</string>
+    <string name="custom_redirects">カスタムリダイレクト</string>
+    <string name="source">ソース</string>
+    <string name="target">目標</string>
     <string name="setting_title_save_data">「データを保存」のリクエスト</string>
     <string name="setting_title_profiles">プロファイル</string>
     <string name="setting_title_profiles_edit">プロファイルの編集</string>
@@ -127,6 +133,7 @@
     <string name="setting_title_reload">下にスワイプして再読み込み</string>
     <string name="setting_title_searchEngine">カスタム検索エンジン</string>
     <string name="setting_title_userAgent">カスタムユーザーエージェント</string>
+    <string name="setting_title_clipboard_record">クリップボードの記録</string>
     <string name="setting_title_fingerPrint">指紋の保護</string>
     <string name="setting_theme">テーマ</string>
     <string name="setting_theme_system">システム</string>

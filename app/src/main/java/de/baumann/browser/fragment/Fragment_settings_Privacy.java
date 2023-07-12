@@ -14,7 +14,6 @@ import androidx.cardview.widget.CardView;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceManager;
 
@@ -28,10 +27,12 @@ import de.baumann.browser.R;
 import de.baumann.browser.activity.ProfilesList;
 import de.baumann.browser.activity.Settings_Profile;
 import de.baumann.browser.browser.AdBlock;
+import de.baumann.browser.dialogs.CustomRedirectsDialog;
+import de.baumann.browser.preferences.BasePreferenceFragment;
 import de.baumann.browser.view.GridAdapter;
 import de.baumann.browser.view.GridItem;
 
-public class Fragment_settings_Privacy extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class Fragment_settings_Privacy extends BasePreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -50,17 +51,18 @@ public class Fragment_settings_Privacy extends PreferenceFragmentCompat implemen
         assert settings_profile != null;
         settings_profile.setOnPreferenceClickListener(preference -> {
 
-            GridItem item_01 = new GridItem(getString(R.string.setting_title_profiles_trusted), 0);
-            GridItem item_02 = new GridItem( getString(R.string.setting_title_profiles_standard), 0);
-            GridItem item_03 = new GridItem( getString(R.string.setting_title_profiles_protected), 0);
+            GridItem item_01 = new GridItem(getString(R.string.setting_title_profiles_trusted), R.drawable.icon_profile_trusted);
+            GridItem item_02 = new GridItem( getString(R.string.setting_title_profiles_standard), R.drawable.icon_profile_standard);
+            GridItem item_03 = new GridItem( getString(R.string.setting_title_profiles_protected), R.drawable.icon_profile_protected);
 
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
             View dialogView = View.inflate(context, R.layout.dialog_menu, null);
             builder.setView(dialogView);
+            builder.setTitle(R.string.setting_title_profiles_edit);
             AlertDialog dialog = builder.create();
             dialog.show();
 
-            CardView cardView = dialogView.findViewById(R.id.cardView);
+            CardView cardView = dialogView.findViewById(R.id.albumCardView);
             cardView.setVisibility(View.GONE);
 
             TextView menuTitle = dialogView.findViewById(R.id.menuTitle);
@@ -118,6 +120,13 @@ public class Fragment_settings_Privacy extends PreferenceFragmentCompat implemen
             sp.edit().putString("listToLoad", "protected").apply();
             Intent intent = new Intent(getActivity(), ProfilesList.class);
             requireActivity().startActivity(intent);
+            return false;
+        });
+        Preference custom_redirects = findPreference("custom_redirects");
+        assert custom_redirects != null;
+        custom_redirects.setOnPreferenceClickListener(preference -> {
+            CustomRedirectsDialog dialog = new CustomRedirectsDialog();
+            dialog.show(getChildFragmentManager(), null);
             return false;
         });
     }

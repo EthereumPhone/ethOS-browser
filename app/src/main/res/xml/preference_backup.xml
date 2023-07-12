@@ -4,32 +4,32 @@
 
     <Preference android:summary="@string/data_summary" />
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="database"
         android:summary="@string/title_appData" />
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="settings"
         android:summary="@string/setting_label" />
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="bookmark"
         android:summary="@string/album_title_bookmarks" />
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="java"
         android:summary="@string/setting_title_profiles_trustedList" />
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="dom"
         android:summary="@string/setting_title_profiles_standardList" />
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="cookie"
         android:summary="@string/setting_title_profiles_protectedList" />

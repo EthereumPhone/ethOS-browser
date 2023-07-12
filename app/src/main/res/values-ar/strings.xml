@@ -14,6 +14,7 @@
     <string name="album_title_home">الصفحة الرئيسية</string>
     <string name="album_title_tab">علامات التبويب المفتوحة</string>
     <string name="search_hint">البحث</string>
+    <string name="create_new">New</string>
     <string name="color_red">أحمر</string>
     <string name="color_pink">وردي</string>
     <string name="color_purple">بنفسجي</string>
@@ -48,6 +49,7 @@
     <string name="menu_save_pdf">حفظ كـ PDF</string>
     <string name="menu_shareClipboard">نسخ للحافظة</string>
     <string name="menu_other_searchSite">البحث في الموقع</string>
+    <string name="link_you_copied">Link you copied</string>
     <!-- Dialog -->
     <string name="dialog_title_hint">العنوان:</string>
     <string name="dialog_URL_hint">العنوان:</string>
@@ -64,6 +66,7 @@
     <string name="setting_label">الاعدادات</string>
     <!-- browser setting -->
     <string name="setting_title_browser">إعدادات المتصفح</string>
+    <string name="setting_title_general">General</string>
     <string name="setting_title_search_engine">محرك البحث</string>
     <string name="setting_summary_search_engine_google">غوغل</string>
     <string name="setting_summary_search_engine_duckduckgo">محرك DuckDuckGo</string>
@@ -80,7 +83,9 @@
     <string name="privacy_redirect">أعدْ التوجيه</string>
     <string name="privacy_redirect_twitter">تويتر</string>
     <string name="privacy_redirect_youTube">يوتيوب</string>
-    <string name="privacy_redirect_inst">انستاغرام</string>
+    <string name="custom_redirects">Custom redirects</string>
+    <string name="source">Source</string>
+    <string name="target">Target</string>
     <string name="setting_title_save_data">اطلب \'حفظ البيانات\'</string>
     <string name="setting_title_profiles">ملفات شخصية</string>
     <string name="setting_title_profiles_edit">حرّر الملفات الشخصية</string>
@@ -127,6 +132,7 @@
     <string name="setting_title_reload">اسحب لأسفل لإعادة التحميل</string>
     <string name="setting_title_searchEngine">محرك بحث مخصص</string>
     <string name="setting_title_userAgent">وكيل مستخدم مخصص</string>
+    <string name="setting_title_clipboard_record">Clipboard record</string>
     <string name="setting_title_fingerPrint">حماية بصمة الإصبع</string>
     <string name="setting_theme">السمة</string>
     <string name="setting_theme_system">نظام</string>

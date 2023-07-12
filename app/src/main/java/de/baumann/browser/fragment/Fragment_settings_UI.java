@@ -7,14 +7,14 @@ import android.os.Bundle;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceGroup;
 
 import java.util.Objects;
 
 import de.baumann.browser.R;
+import de.baumann.browser.preferences.BasePreferenceFragment;
 
-public class Fragment_settings_UI extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class Fragment_settings_UI extends BasePreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -55,7 +55,7 @@ public class Fragment_settings_UI extends PreferenceFragmentCompat implements Sh
     public void onSharedPreferenceChanged(final SharedPreferences sp, String key) {
         if (key.equals("sp_exit") || key.equals("sp_toggle") || key.equals("sp_add") || key.equals("sp_theme")
                 || key.equals("nav_position") || key.equals("sp_hideOmni") || key.equals("start_tab") || key.equals("sp_hideSB")
-                || key.equals("overView_place") || key.equals("overView_hide") || key.equals("hideToolbar")) {
+                || key.equals("overView_place") || key.equals("overView_hide") || key.equals("hideToolbar") || key.equals("useDynamicColor")) {
             sp.edit().putInt("restart_changed", 1).apply();
         }
         updatePrefSummary(findPreference(key));

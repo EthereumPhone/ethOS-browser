@@ -14,6 +14,7 @@
     <string name="album_title_home">صفحه خانگی</string>
     <string name="album_title_tab">زبانه های باز</string>
     <string name="search_hint">جستجو</string>
+    <string name="create_new">جدید</string>
     <string name="color_red">قرمز</string>
     <string name="color_pink">صورتی</string>
     <string name="color_purple">بنفش</string>
@@ -48,6 +49,7 @@
     <string name="menu_save_pdf">ذخیره به عنوان PDF</string>
     <string name="menu_shareClipboard">کپی در حافظه</string>
     <string name="menu_other_searchSite">جستجو در صفحه </string>
+    <string name="link_you_copied">پیوند کپی شد</string>
     <!-- Dialog -->
     <string name="dialog_title_hint">عنوان:</string>
     <string name="dialog_URL_hint">URL:</string>
@@ -64,6 +66,7 @@
     <string name="setting_label">تنظیمات</string>
     <!-- browser setting -->
     <string name="setting_title_browser">تنظیمات مرورگر</string>
+    <string name="setting_title_general">عمومي</string>
     <string name="setting_title_search_engine">موتور جستجو</string>
     <string name="setting_summary_search_engine_google">گوگل</string>
     <string name="setting_summary_search_engine_duckduckgo">DuckDuckGo</string>
@@ -80,7 +83,9 @@
     <string name="privacy_redirect">هدایت</string>
     <string name="privacy_redirect_twitter">توییتر</string>
     <string name="privacy_redirect_youTube">یوتیوب</string>
-    <string name="privacy_redirect_inst">اینستاگرام</string>
+    <string name="custom_redirects">تغییرمسیرهای سفارشی</string>
+    <string name="source">منبع</string>
+    <string name="target">هدف</string>
     <string name="setting_title_save_data">درخواست صرفه جویی داده</string>
     <string name="setting_title_profiles">نمایه‌ ها</string>
     <string name="setting_title_profiles_edit">ویرایش نمایه ها</string>
@@ -127,6 +132,7 @@
     <string name="setting_title_reload">برای بارگیری مجدد انگشت خود را به پایین بکشید</string>
     <string name="setting_title_searchEngine">موتور جستجوی سفارشی</string>
     <string name="setting_title_userAgent">سفارشی سازی نماینده کاربری </string>
+    <string name="setting_title_clipboard_record">Clipboard record</string>
     <string name="setting_title_fingerPrint">محافظت به وسیله اثرانگشت</string>
     <string name="setting_theme">پوسته</string>
     <string name="setting_theme_system">سامانه</string>

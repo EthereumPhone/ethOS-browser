@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="@string/setting_title_general">
+
+        <EditTextPreference
+            android:defaultValue="https://github.com/scoute-dich/browser/wiki"
+            android:key="favoriteURL"
+            android:title="@string/setting_title_fav" />
+
+        <de.baumann.browser.preferences.EditTextSwitchPreference
+            android:key="sp_userAgent"
+            android:selectable="true"
+            android:title="@string/setting_title_userAgent"
+            app:editTextSwitchKey="userAgentSwitch"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/setting_title_search_engine">
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/setting_entries_search_engine"
+            android:entryValues="@array/setting_values_search_engine"
+            android:key="sp_search_engine"
+            android:title="@string/setting_title_search_engine" />
+
+        <de.baumann.browser.preferences.EditTextSwitchPreference
+            android:key="sp_search_engine_custom"
+            android:selectable="true"
+            android:title="@string/setting_title_searchEngine"
+            app:editTextSwitchKey="searchEngineSwitch"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/menu_more">
+
+        <SwitchPreferenceCompat
+            android:title="@string/setting_title_clipboard_record"
+            android:defaultValue="false"
+            android:key="sp_clipboard_record" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,6 +1,7 @@
 package de.baumann.browser.view;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.content.ContentValues.TAG;
 import static android.content.Context.NOTIFICATION_SERVICE;
 
 import android.annotation.SuppressLint;
@@ -13,33 +14,42 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
+import android.graphics.Color;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.FrameLayout;
+import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationCompat;
 import androidx.preference.PreferenceManager;
 import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewFeature;
 
 import com.google.android.material.chip.Chip;
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -58,15 +68,10 @@ import de.baumann.browser.database.FaviconHelper;
 import de.baumann.browser.database.Record;
 import de.baumann.browser.database.RecordAction;
 import de.baumann.browser.unit.BrowserUnit;
+import de.baumann.browser.unit.HelperUnit;
 
 public class NinjaWebView extends WebView implements AlbumController {
 
-    private static final float[] NEGATIVE_COLOR = {
-            -1.0f, 0, 0, 0, 255, // Red
-            0, -1.0f, 0, 0, 255, // Green
-            0, 0, -1.0f, 0, 255, // Blue
-            0, 0, 0, 1.0f, 0     // Alpha
-    };
     public boolean fingerPrintProtection;
     public boolean history;
     public boolean adBlock;
@@ -76,7 +81,6 @@ public class NinjaWebView extends WebView implements AlbumController {
     private OnScrollChangeListener onScrollChangeListener;
     private Context context;
     private boolean desktopMode;
-    private boolean nightMode;
     private boolean stopped;
     private AdapterTabs album;
     private AlbumController predecessor = null;
@@ -108,7 +112,6 @@ public class NinjaWebView extends WebView implements AlbumController {
         this.context = context;
         this.foreground = false;
         this.desktopMode = false;
-        this.nightMode = false;
         this.isBackPressed = false;
         this.fingerPrintProtection = sp.getBoolean(profile + "_fingerPrintProtection", true);
         this.history = sp.getBoolean(profile + "_history", true);
@@ -121,14 +124,60 @@ public class NinjaWebView extends WebView implements AlbumController {
         this.listStandard = new List_standard(this.context);
         this.listProtected = new List_protected(this.context);
         this.album = new AdapterTabs(this.context, this, browserController);
-        this.webViewClient = new NinjaWebViewClient(this);
+        this.webViewClient = new NinjaWebViewClient(this) {
+            @Override
+            public void onReceivedError(WebView webview, WebResourceRequest request, WebResourceError error) {
+                Context context = webview.getContext();
+                String description = error.getDescription().toString();
+                String failingUrl = request.getUrl().toString();
+                String urlToLoad = sp.getString("urlToLoad", "");
+                String htmlData = getErrorHTML(context, description, urlToLoad);
+                if (failingUrl.contains(urlToLoad)) {
+                    webview.loadDataWithBaseURL(urlToLoad, htmlData, "text/html", "UTF-8",urlToLoad);
+                    webview.invalidate();
+                }
+            }
+        };
         this.webChromeClient = new NinjaWebChromeClient(this);
-        this.downloadListener = new NinjaDownloadListener(this.context);
+        this.downloadListener = new NinjaDownloadListener(this.context, this);
 
         initWebView();
         initAlbum();
 
         this.addJavascriptInterface(new AndroidEthereum(context, this), "AndroidEthereum");
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static String getErrorHTML(Context context, String description, String failingUrl) {
+        int primary = MaterialColors.getColor(context, R.attr.colorPrimary, Color.GREEN);
+        int background = MaterialColors.getColor(context, android.R.attr.colorBackground, Color.BLACK);
+        String primaryHex = String.format("#%06X", (0xFFFFFF & primary));
+        String backgroundHex = String.format("#%06X", (0xFFFFFF & background));
+        String errorSvgPath = "";
+        try {
+            InputStream inputStream = context.getResources().openRawResource(R.raw.error);
+            byte[] b = new byte[inputStream.available()];
+            inputStream.read(b);
+            errorSvgPath = new String(b);
+        } catch (Exception ignored) {}
+
+        String s = context.getString(R.string.app_error) + ": " +failingUrl;
+        return "<html><body>" +
+                errorSvgPath +
+                "<div align=\"center\">" +
+                description +
+                "<hr style=\"height: 1rem; visibility:hidden;\" />" +
+                s +
+                "\n</div>" +
+                "<a href=\"" + failingUrl + "\">" + context.getString(R.string.menu_reload) + "</a>" +
+                "</body></html>" +
+                "<style>" +
+                "html { background: " + backgroundHex + ";" + "color: " + primaryHex + "; }" +
+                "body { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center }" +
+                "svg { transform: scale(3); margin-bottom: 4rem; fill: " + primaryHex + "; }" +
+                "a { margin-top: 1rem; text-decoration: none; padding: 0.7rem 1rem; border-radius: 1rem; background: " + primaryHex + ";" + "color: " + backgroundHex + "; }" +
+                "p { line-height: 150%; }" +
+                "</style>";
     }
 
     @Override
@@ -173,6 +222,20 @@ public class NinjaWebView extends WebView implements AlbumController {
         String profileOriginal = profile;
         WebSettings webSettings = getSettings();
 
+        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if ((nightModeFlags == Configuration.UI_MODE_NIGHT_YES) || sp.getString("sp_theme", "1").equals("3")) {
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+                boolean allowed = sp.getBoolean("setAlgorithmicDarkeningAllowed", true);
+                if (!allowed) {
+                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(webSettings, false);
+                    sp.edit().putBoolean("setAlgorithmicDarkeningAllowed", false).apply();
+                } else {
+                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(webSettings, true);
+                    sp.edit().putBoolean("setAlgorithmicDarkeningAllowed", true).apply();
+                }
+            }
+        }
+
         String userAgent = getUserAgent(desktopMode);
         webSettings.setUserAgentString(userAgent);
         if (android.os.Build.VERSION.SDK_INT >= 26) webSettings.setSafeBrowsingEnabled(true);
@@ -215,16 +278,11 @@ public class NinjaWebView extends WebView implements AlbumController {
         webSettings.setAllowFileAccessFromFileURLs(true);
         webSettings.setAllowUniversalAccessFromFileURLs(true);
 
-
-    }
-
-    public synchronized void initCookieManager(String url) {
-        sp = PreferenceManager.getDefaultSharedPreferences(context);
-        profile = sp.getString("profile", "profileStandard");
-        String profileOriginal = profile;
-        if (listTrusted.isWhite(url)) profile = "profileTrusted";
-        else if (listStandard.isWhite(url)) profile = "profileStandard";
-        else if (listProtected.isWhite(url)) profile = "profileProtected";
+        fingerPrintProtection = sp.getBoolean(profile + "_fingerPrintProtection", true);
+        history = sp.getBoolean(profile + "_saveHistory", true);
+        adBlock = sp.getBoolean(profile + "_adBlock", true);
+        saveData = sp.getBoolean(profile + "_saveData", true);
+        camera = sp.getBoolean(profile + "_camera", true);
 
         CookieManager manager = CookieManager.getInstance();
         if (sp.getBoolean(profile + "_cookies", false)) {
@@ -237,6 +295,7 @@ public class NinjaWebView extends WebView implements AlbumController {
 
     public void setProfileIcon(FloatingActionButton omniBox_tab) {
         String url = this.getUrl();
+        String profile = sp.getString("profile", "profileStandard");
         assert url != null;
         switch (profile) {
             case "profileTrusted":
@@ -253,9 +312,21 @@ public class NinjaWebView extends WebView implements AlbumController {
                 break;
         }
 
-        if (listTrusted.isWhite(url)) omniBox_tab.setImageResource(R.drawable.icon_profile_trusted);
-        else if (listStandard.isWhite(url)) omniBox_tab.setImageResource(R.drawable.icon_profile_standard);
-        else if (listProtected.isWhite(url)) omniBox_tab.setImageResource(R.drawable.icon_profile_protected);
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(R.attr.colorError, typedValue, true);
+        int color = typedValue.data;
+
+        if (listTrusted.isWhite(url)) {
+            omniBox_tab.setImageResource(R.drawable.icon_profile_trusted);
+            omniBox_tab.getDrawable().mutate().setTint(color);
+        } else if (listStandard.isWhite(url)) {
+            omniBox_tab.setImageResource(R.drawable.icon_profile_standard);
+            omniBox_tab.getDrawable().mutate().setTint(color);
+        } else if (listProtected.isWhite(url)) {
+            omniBox_tab.setImageResource(R.drawable.icon_profile_protected);
+            omniBox_tab.getDrawable().mutate().setTint(color);
+        }
     }
 
     public void setProfileDefaultValues() {
@@ -365,28 +436,28 @@ public class NinjaWebView extends WebView implements AlbumController {
                 chip_profile_standard.setChecked(false);
                 chip_profile_protected.setChecked(false);
                 chip_profile_changed.setChecked(false);
-                textTitle = this.context.getString(R.string.setting_title_profiles_active) + ": " + this.context.getString(R.string.setting_title_profiles_trusted);
+                textTitle = this.context.getString(R.string.setting_title_profiles_trusted);
                 break;
             case "profileStandard":
                 chip_profile_trusted.setChecked(false);
                 chip_profile_standard.setChecked(true);
                 chip_profile_protected.setChecked(false);
                 chip_profile_changed.setChecked(false);
-                textTitle = this.context.getString(R.string.setting_title_profiles_active) + ": " + this.context.getString(R.string.setting_title_profiles_standard);
+                textTitle = this.context.getString(R.string.setting_title_profiles_standard);
                 break;
             case "profileProtected":
                 chip_profile_trusted.setChecked(false);
                 chip_profile_standard.setChecked(false);
                 chip_profile_protected.setChecked(true);
                 chip_profile_changed.setChecked(false);
-                textTitle = this.context.getString(R.string.setting_title_profiles_active) + ": " + this.context.getString(R.string.setting_title_profiles_protected);
+                textTitle = this.context.getString(R.string.setting_title_profiles_protected);
                 break;
             default:
                 chip_profile_trusted.setChecked(false);
                 chip_profile_standard.setChecked(false);
                 chip_profile_protected.setChecked(false);
                 chip_profile_changed.setChecked(true);
-                textTitle = this.context.getString(R.string.setting_title_profiles_active) + ": " + this.context.getString(R.string.setting_title_profiles_changed);
+                textTitle = this.context.getString(R.string.setting_title_profiles_changed);
                 break;
         }
         dialog_titleProfile.setText(textTitle);
@@ -424,7 +495,6 @@ public class NinjaWebView extends WebView implements AlbumController {
     }
 
     private synchronized void initAlbum() {
-        album.setAlbumTitle(context.getString(R.string.app_name));
         album.setBrowserController(browserController);
     }
 
@@ -489,20 +559,91 @@ public class NinjaWebView extends WebView implements AlbumController {
     public synchronized void reload() {
         stopped = false;
         this.initPreferences(this.getUrl());
-        super.reload();
+        try {
+            this.loadUrl(Objects.requireNonNull(this.getUrl()));
+            super.reload();
+        } catch (Exception e) {
+            Log.i(TAG, "shouldOverrideUrlLoading Exception:" + e);
+            NinjaToast.show(context, R.string.app_error);
+        }
     }
 
     @Override
     public synchronized void loadUrl(@NonNull String url) {
-        String urlToLoad = BrowserUnit.redirectURL(this, sp, url).trim();
-        toggleWidescreen(url);
-        initCookieManager(url);
-        initPreferences(BrowserUnit.queryWrapper(context, urlToLoad));
         InputMethodManager imm = (InputMethodManager) this.context.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(this.getWindowToken(), 0);
         favicon = null;
         stopped = false;
-        super.loadUrl(BrowserUnit.queryWrapper(context, urlToLoad), getRequestHeaders());
+
+        if (url.startsWith("http://")) {
+
+            GridItem item_01 = new GridItem("https://", R.drawable.icon_https);
+            GridItem item_02 = new GridItem( "http://", R.drawable.icon_http);
+            GridItem item_03 = new GridItem( context.getString(R.string.app_cancel), R.drawable.icon_close);
+
+            View dialogView = View.inflate(context, R.layout.dialog_menu, null);
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
+
+            LinearLayout textGroup = dialogView.findViewById(R.id.textGroup);
+            TextView menuURL = dialogView.findViewById(R.id.menuURL);
+            menuURL.setText(url);
+            menuURL.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+            menuURL.setSingleLine(true);
+            menuURL.setMarqueeRepeatLimit(1);
+            menuURL.setSelected(true);
+            textGroup.setOnClickListener(v -> {
+                menuURL.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+                menuURL.setSingleLine(true);
+                menuURL.setMarqueeRepeatLimit(1);
+                menuURL.setSelected(true);
+            });
+            TextView menuTitle = dialogView.findViewById(R.id.menuTitle);
+            menuTitle.setText(HelperUnit.domain(url));
+            TextView message = dialogView.findViewById(R.id.message);
+            message.setVisibility(View.VISIBLE);
+            message.setText(R.string.toast_unsecured);
+            FaviconHelper.setFavicon(context, dialogView, null, R.id.menu_icon, R.drawable.icon_alert);
+            builder.setView(dialogView);
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+            HelperUnit.setupDialog(context, dialog);
+
+            GridView menu_grid = dialogView.findViewById(R.id.menu_grid);
+            final List<GridItem> gridList = new LinkedList<>();
+            gridList.add(gridList.size(), item_01);
+            gridList.add(gridList.size(), item_02);
+            gridList.add(gridList.size(), item_03);
+            GridAdapter gridAdapter = new GridAdapter(context, gridList);
+            menu_grid.setAdapter(gridAdapter);
+            gridAdapter.notifyDataSetChanged();
+            menu_grid.setOnItemClickListener((parent, view, position, id) -> {
+                switch (position) {
+                    case 0:
+                        dialog.cancel();
+                        String finalURL = url.replace("http://", "https://");
+                        sp.edit().putString("urlToLoad", finalURL).apply();
+                        initPreferences(BrowserUnit.queryWrapper(context, finalURL));
+                        super.loadUrl(BrowserUnit.queryWrapper(context, finalURL), getRequestHeaders());
+                        break;
+                    case 1:
+                        dialog.cancel();
+                        sp.edit().putString("urlToLoad", url).apply();
+                        initPreferences(BrowserUnit.queryWrapper(context, url));
+                        super.loadUrl(BrowserUnit.queryWrapper(context, url), getRequestHeaders());
+                        break;
+                    case 2:
+                        dialog.cancel();
+                        super.loadUrl(BrowserUnit.queryWrapper(context, "about:blank"), getRequestHeaders());
+                        break;
+                }
+            });
+        } else {
+            sp.edit().putString("urlToLoad", url).apply();
+            initPreferences(BrowserUnit.queryWrapper(context, url));
+            super.loadUrl(BrowserUnit.queryWrapper(context, url), getRequestHeaders());
+        }
+
     }
 
     @Override
@@ -511,7 +652,7 @@ public class NinjaWebView extends WebView implements AlbumController {
     }
 
     public void setAlbumTitle(String title, String url) {
-        album.setAlbumTitle(title);
+        album.setAlbumTitle(title, url);
         FaviconHelper.setFavicon(context, getAlbumView(), url, R.id.faviconView, R.drawable.icon_image_broken);
     }
 
@@ -534,8 +675,8 @@ public class NinjaWebView extends WebView implements AlbumController {
         else if (foreground) browserController.updateProgress(BrowserUnit.LOADING_STOPPED);
     }
 
-    public synchronized void updateTitle(String title) {
-        album.setAlbumTitle(title);
+    public synchronized void updateTitle(String title, String url) {
+        album.setAlbumTitle(title, url);
     }
 
     public synchronized void updateFavicon(String url) {
@@ -554,10 +695,6 @@ public class NinjaWebView extends WebView implements AlbumController {
 
     public boolean isDesktopMode() {
         return desktopMode;
-    }
-
-    public boolean isNightMode() {
-        return nightMode;
     }
 
     public boolean isFingerPrintProtection() {
@@ -609,7 +746,6 @@ public class NinjaWebView extends WebView implements AlbumController {
         }
 
         String ownUserAgent = sp.getString("sp_userAgent", "");
-        assert ownUserAgent != null;
         if (!ownUserAgent.equals("") && (sp.getBoolean("userAgentSwitch", false)))
             newUserAgent = ownUserAgent;
         return newUserAgent;
@@ -624,41 +760,17 @@ public class NinjaWebView extends WebView implements AlbumController {
         if (reload) reload();
     }
 
-    public void toggleWidescreen(String url) {
-        if (url.contains(".jpg")||
-                url.contains(".jpeg")||
-                url.contains(".png")||
-                url.contains(".webg")){
-            getSettings().setUseWideViewPort(true);
-            getSettings().setLoadWithOverviewMode(true);
-        } else {
-            getSettings().setUseWideViewPort(desktopMode);
-            getSettings().setLoadWithOverviewMode(desktopMode);
-        }
-    }
-
     public void toggleNightMode() {
-        nightMode = !nightMode;
-        if (nightMode) {
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK))
-                WebSettingsCompat.setForceDark(this.getSettings(), WebSettingsCompat.FORCE_DARK_ON);
-            else {
-                Paint paint = new Paint();
-                ColorMatrix matrix = new ColorMatrix();
-                matrix.set(NEGATIVE_COLOR);
-                ColorMatrix gcm = new ColorMatrix();
-                gcm.setSaturation(0);
-                ColorMatrix concat = new ColorMatrix();
-                concat.setConcat(matrix, gcm);
-                ColorMatrixColorFilter filter = new ColorMatrixColorFilter(concat);
-                paint.setColorFilter(filter);
-                // maybe sometime LAYER_TYPE_NONE would better?
-                this.setLayerType(View.LAYER_TYPE_HARDWARE, paint);
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+            WebSettings s = this.getSettings();
+            boolean allowed = sp.getBoolean("setAlgorithmicDarkeningAllowed", true);
+            if (allowed) {
+                WebSettingsCompat.setAlgorithmicDarkeningAllowed(s, false);
+                sp.edit().putBoolean("setAlgorithmicDarkeningAllowed", false).apply();
+            } else {
+                WebSettingsCompat.setAlgorithmicDarkeningAllowed(s, true);
+                sp.edit().putBoolean("setAlgorithmicDarkeningAllowed", true).apply();
             }
-        } else {
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK))
-                WebSettingsCompat.setForceDark(this.getSettings(), WebSettingsCompat.FORCE_DARK_OFF);
-            else this.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
     }
 

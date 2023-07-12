@@ -2,10 +2,11 @@ package de.baumann.browser.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.material.card.MaterialCardView;
@@ -22,6 +23,7 @@ class AdapterTabs {
 
     private View albumView;
     private TextView albumTitle;
+    private TextView albumUrl;
     private BrowserController browserController;
     private MaterialCardView albumCardView;
 
@@ -36,8 +38,9 @@ class AdapterTabs {
         return albumView;
     }
 
-    void setAlbumTitle(String title) {
+    void setAlbumTitle(String title, String url) {
         albumTitle.setText(title);
+        albumUrl.setText(url);
     }
 
     void setBrowserController(BrowserController browserController) {
@@ -49,8 +52,9 @@ class AdapterTabs {
         albumView = LayoutInflater.from(context).inflate(R.layout.item_list, null, false);
         albumCardView = albumView.findViewById(R.id.albumCardView);
         albumTitle = albumView.findViewById(R.id.titleView);
+        albumUrl = albumView.findViewById(R.id.dateView);
 
-        Button albumClose = albumView.findViewById(R.id.cancelButton);
+        ImageView albumClose = albumView.findViewById(R.id.iconView);
         albumClose.setVisibility(View.VISIBLE);
         albumClose.setOnClickListener(view -> {
             browserController.removeAlbum(albumController);
@@ -62,8 +66,15 @@ class AdapterTabs {
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.colorSecondaryContainer, typedValue, true);
         int color = typedValue.data;
+
+        context.getTheme().resolveAttribute(R.attr.colorError, typedValue, true);
+        int color2 = typedValue.data;
+
         albumCardView.setCardBackgroundColor(color);
-        albumTitle.setOnClickListener(view -> {
+        albumTitle.setTypeface(null, Typeface.BOLD);
+        albumTitle.setTextColor(color2);
+        albumUrl.setTextColor(color2);
+        albumView.setOnClickListener(view -> {
             albumCardView.setCardBackgroundColor(color);
             browserController.hideOverview();
         });
@@ -73,8 +84,15 @@ class AdapterTabs {
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.colorSurfaceVariant, typedValue, true);
         int color = typedValue.data;
+
+        context.getTheme().resolveAttribute(R.attr.colorOnSurfaceVariant, typedValue, true);
+        int color2 = typedValue.data;
+
         albumCardView.setCardBackgroundColor(color);
-        albumTitle.setOnClickListener(view -> {
+        albumTitle.setTypeface(null, Typeface.NORMAL);
+        albumTitle.setTextColor(color2);
+        albumUrl.setTextColor(color2);
+        albumView.setOnClickListener(view -> {
             browserController.showAlbum(albumController);
             browserController.hideOverview();
         });

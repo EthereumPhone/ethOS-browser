@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="@string/setting_title_browser"
-        app:initialExpandedChildrenCount="4">
+        android:title="@string/setting_title_browser">
+
+        <Preference
+            android:key="settings_general"
+            android:title="@string/setting_title_general" />
 
         <Preference
             android:key="settings_start"

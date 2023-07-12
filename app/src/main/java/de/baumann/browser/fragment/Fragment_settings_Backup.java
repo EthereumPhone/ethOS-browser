@@ -10,7 +10,6 @@ import android.os.Environment;
 import android.widget.Button;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -34,11 +33,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import de.baumann.browser.R;
+import de.baumann.browser.preferences.BasePreferenceFragment;
 import de.baumann.browser.unit.BackupUnit;
 import de.baumann.browser.unit.HelperUnit;
 import de.baumann.browser.view.NinjaToast;
 
-public class Fragment_settings_Backup extends PreferenceFragmentCompat {
+public class Fragment_settings_Backup extends BasePreferenceFragment {
 
     public File sd;
     public File data;

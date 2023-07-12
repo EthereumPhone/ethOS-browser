@@ -14,6 +14,7 @@
     <string name="album_title_home">Pagina principale</string>
     <string name="album_title_tab">Schede aperte</string>
     <string name="search_hint">Cerca</string>
+    <string name="create_new">Nuovo</string>
     <string name="color_red">Rosso</string>
     <string name="color_pink">Rosa</string>
     <string name="color_purple">Viola</string>
@@ -48,6 +49,7 @@
     <string name="menu_save_pdf">Salva come PDF</string>
     <string name="menu_shareClipboard">Copia negli Appunti</string>
     <string name="menu_other_searchSite">Cerca nel sito</string>
+    <string name="link_you_copied">Link copiato</string>
     <!-- Dialog -->
     <string name="dialog_title_hint">Titolo:</string>
     <string name="dialog_URL_hint">URL:</string>
@@ -64,6 +66,7 @@
     <string name="setting_label">Impostazioni</string>
     <!-- browser setting -->
     <string name="setting_title_browser">Impostazioni browser</string>
+    <string name="setting_title_general">Generale</string>
     <string name="setting_title_search_engine">Motore di ricerca</string>
     <string name="setting_summary_search_engine_google">Google</string>
     <string name="setting_summary_search_engine_duckduckgo">DuckDuckGo</string>
@@ -80,7 +83,9 @@
     <string name="privacy_redirect">Reindirizzamento</string>
     <string name="privacy_redirect_twitter">Twitter</string>
     <string name="privacy_redirect_youTube">YouTube</string>
-    <string name="privacy_redirect_inst">Instagram</string>
+    <string name="custom_redirects">Redirect personalizzati</string>
+    <string name="source">Sorgente</string>
+    <string name="target">Bersaglio</string>
     <string name="setting_title_save_data">Richiedi \'Salva dati\'</string>
     <string name="setting_title_profiles">Profili</string>
     <string name="setting_title_profiles_edit">Modifica profili</string>
@@ -127,6 +132,7 @@
     <string name="setting_title_reload">Trascina in basso per rifiutare</string>
     <string name="setting_title_searchEngine">Motore di ricerca personalizzato</string>
     <string name="setting_title_userAgent">Agente utente personalizzato</string>
+    <string name="setting_title_clipboard_record">Registrazioni nel blocco note</string>
     <string name="setting_title_fingerPrint">Protezione dalle impronte digitali</string>
     <string name="setting_theme">Tema</string>
     <string name="setting_theme_system">Sistema</string>

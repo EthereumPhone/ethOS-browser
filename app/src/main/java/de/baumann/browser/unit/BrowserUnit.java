@@ -24,7 +24,10 @@ import android.webkit.WebView;
 import androidx.core.app.NotificationCompat;
 import androidx.preference.PreferenceManager;
 
+import org.json.JSONException;
+
 import java.io.File;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -32,6 +35,8 @@ import java.util.regex.Pattern;
 import de.baumann.browser.R;
 import de.baumann.browser.activity.BrowserActivity;
 import de.baumann.browser.database.RecordAction;
+import de.baumann.browser.objects.CustomRedirect;
+import de.baumann.browser.objects.CustomRedirectsHelper;
 
 public class BrowserUnit {
 
@@ -89,7 +94,7 @@ public class BrowserUnit {
 
     public static String queryWrapper(Context context, String query) {
 
-        if (isURL(query)) {
+        if (isURL(query) || query.equals("")) {
             if (query.startsWith(URL_SCHEME_ABOUT) || query.startsWith(URL_SCHEME_MAIL_TO)) {
                 return query;
             }
@@ -97,48 +102,50 @@ public class BrowserUnit {
             if (!query.contains("://")) {
                 query = URL_SCHEME_HTTPS + query;
             }
-
             return query;
-        }
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String customSearchEngine = sp.getString("sp_search_engine_custom", "");
-        assert customSearchEngine != null;
-
-        //Override UserAgent if own UserAgent is defined
-        if (!sp.contains("searchEngineSwitch")) {  //if new switch_text_preference has never been used initialize the switch
-            if (customSearchEngine.equals("")) {
-                sp.edit().putBoolean("searchEngineSwitch", false).apply();
-            } else {
-                sp.edit().putBoolean("searchEngineSwitch", true).apply();
-            }
-        }
-
-        if (sp.getBoolean("searchEngineSwitch", false)) {  //if new switch_text_preference has never been used initialize the switch
-            return customSearchEngine + query;
         } else {
-            final int i = Integer.parseInt(Objects.requireNonNull(sp.getString("sp_search_engine", "0")));
-            switch (i) {
-                case 1:
-                    return SEARCH_ENGINE_STARTPAGE_DE + query;
-                case 2:
-                    return SEARCH_ENGINE_BAIDU + query;
-                case 3:
-                    return SEARCH_ENGINE_BING + query;
-                case 4:
-                    return SEARCH_ENGINE_DUCKDUCKGO + query;
-                case 5:
-                    return SEARCH_ENGINE_GOOGLE + query;
-                case 6:
-                    return SEARCH_ENGINE_SEARX + query;
-                case 7:
-                    return SEARCH_ENGINE_QWANT + query;
-                case 8:
-                    return SEARCH_ENGINE_ECOSIA + query;
-                case 9:
-                    return SEARCH_ENGINE_Metager + query;
-                default:
-                    return SEARCH_ENGINE_STARTPAGE + query;
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+            String customSearchEngine = sp.getString("sp_search_engine_custom", "");
+
+            query = query.replace("&", "%26");
+
+            //Override UserAgent if own UserAgent is defined
+            if (!sp.contains("searchEngineSwitch")) {
+                //if new switch_text_preference has never been used initialize the switch
+                if (customSearchEngine.equals("")) {
+                    sp.edit().putBoolean("searchEngineSwitch", false).apply();
+                } else {
+                    sp.edit().putBoolean("searchEngineSwitch", true).apply();
+                }
+            }
+
+            if (sp.getBoolean("searchEngineSwitch", false)) {
+                //if new switch_text_preference has never been used initialize the switch
+                return customSearchEngine + query;
+            } else {
+                final int i = Integer.parseInt(Objects.requireNonNull(sp.getString("sp_search_engine", "0")));
+                switch (i) {
+                    case 1:
+                        return SEARCH_ENGINE_STARTPAGE_DE + query;
+                    case 2:
+                        return SEARCH_ENGINE_BAIDU + query;
+                    case 3:
+                        return SEARCH_ENGINE_BING + query;
+                    case 4:
+                        return SEARCH_ENGINE_DUCKDUCKGO + query;
+                    case 5:
+                        return SEARCH_ENGINE_GOOGLE + query;
+                    case 6:
+                        return SEARCH_ENGINE_SEARX + query;
+                    case 7:
+                        return SEARCH_ENGINE_QWANT + query;
+                    case 8:
+                        return SEARCH_ENGINE_ECOSIA + query;
+                    case 9:
+                        return SEARCH_ENGINE_Metager + query;
+                    default:
+                        return SEARCH_ENGINE_STARTPAGE + query;
+                }
             }
         }
     }
@@ -197,31 +204,46 @@ public class BrowserUnit {
 
         String domain = HelperUnit.domain(url);
         boolean redirect = sp.getBoolean("redirect", false);
+        if (!redirect) return url;
 
-        if (sp.getBoolean("sp_youTube_switch", false) && redirect &&
-                (domain.contains("youtube.") || domain.contains("youtu."))) {
+        try {
+            List<CustomRedirect> redirects = CustomRedirectsHelper.getRedirects(sp);
+
+            for (int i = 0; i < redirects.size(); i++) {
+                CustomRedirect customRedirect = redirects.get(i);
+                if (domain.contains(customRedirect.getSource())) {
+                    ninjaWebView.stopLoading();
+                    url = url.replace(customRedirect.getSource(), customRedirect.getTarget());
+                    return url;
+                }
+            }
+        } catch (JSONException e) {
+            Log.e("Redirect error", e.toString());
+        }
+
+        if (sp.getBoolean("sp_youTube_switch", false) &&
+                domain.equals("youtube.com") || domain.equals("m.youtube.com")) {
             ninjaWebView.stopLoading();
-            String substring = url.substring(url.indexOf("watch?v=") + 8);
-            url = sp.getString("sp_youTube_string", "https://invidious.snopyta.org/") + substring;
+            String substring = url.substring(url.indexOf("youtube.com") + 12);
+            url = sp.getString("sp_youTube_string", "https://yewtu.be/") + substring;
             return url;
         }
 
-        else if (sp.getBoolean("sp_twitter_switch", false) && redirect && domain.contains("twitter.")) {
+        else if (sp.getBoolean("sp_twitter_switch", false) &&
+                domain.equals("twitter.com") || domain.equals("m.twitter.com")) {
             ninjaWebView.stopLoading();
             String substring = url.substring(url.indexOf("twitter.com") + 12);
             url = sp.getString("sp_twitter_string", "https://nitter.net/") + substring;
             return url;
         }
 
-        else if (sp.getBoolean("sp_instagram_switch", false) && redirect && domain.contains("instagram.com")) {
+        else if (sp.getBoolean("sp_instagram_switch", false) && (domain.equals("instagram.com"))) {
             ninjaWebView.stopLoading();
             String substring = url.substring(url.indexOf("instagram.com") + 14);
             url = sp.getString("sp_instagram_string", "https://bibliogram.pussthecat.org/") + substring;
             return url;
         }
-        else {
-            return url;
-        }
+        return url;
     }
 
     public static void openInBackground(Activity activity, Intent intent, String url) {

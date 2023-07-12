@@ -14,6 +14,7 @@
     <string name="album_title_home">Inicio</string>
     <string name="album_title_tab">Pestañas abiertas</string>
     <string name="search_hint">Búsqueda</string>
+    <string name="create_new">Nuevo</string>
     <string name="color_red">Rojo</string>
     <string name="color_pink">Rosa</string>
     <string name="color_purple">Púrpura</string>
@@ -48,6 +49,7 @@
     <string name="menu_save_pdf">Guardar como PDF</string>
     <string name="menu_shareClipboard">Copiar al portapapeles</string>
     <string name="menu_other_searchSite">Buscar en sitio web</string>
+    <string name="link_you_copied">Enlace copiado</string>
     <!-- Dialog -->
     <string name="dialog_title_hint">Título de entrada:</string>
     <string name="dialog_URL_hint">URL:</string>
@@ -64,6 +66,7 @@
     <string name="setting_label">Configuración</string>
     <!-- browser setting -->
     <string name="setting_title_browser">Configuración del navegador</string>
+    <string name="setting_title_general">General</string>
     <string name="setting_title_search_engine">Motor de búsqueda</string>
     <string name="setting_summary_search_engine_google">Google</string>
     <string name="setting_summary_search_engine_duckduckgo">DuckDuckGo</string>
@@ -80,7 +83,9 @@
     <string name="privacy_redirect">Redirigir</string>
     <string name="privacy_redirect_twitter">Twitter</string>
     <string name="privacy_redirect_youTube">YouTube</string>
-    <string name="privacy_redirect_inst">Instagram</string>
+    <string name="custom_redirects">Redirecciones personalizadas</string>
+    <string name="source">Origen</string>
+    <string name="target">Destinatario</string>
     <string name="setting_title_save_data">Solicitar \"reducir datos\"</string>
     <string name="setting_title_profiles">Perfiles</string>
     <string name="setting_title_profiles_edit">Editar perfil</string>
@@ -127,6 +132,7 @@
     <string name="setting_title_reload">Deslice hacia abajo para refrescar</string>
     <string name="setting_title_searchEngine">Motor de búsqueda personalizado</string>
     <string name="setting_title_userAgent">Agente de usuario personalizado</string>
+    <string name="setting_title_clipboard_record">Registro del portapapeles</string>
     <string name="setting_title_fingerPrint">Protección de huella dactilar</string>
     <string name="setting_theme">Tema</string>
     <string name="setting_theme_system">Sistema</string>

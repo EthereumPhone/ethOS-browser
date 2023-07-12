@@ -14,6 +14,7 @@
     <string name="album_title_home">Startpagina</string>
     <string name="album_title_tab">Geopende Tabbladen</string>
     <string name="search_hint">Zoeken</string>
+    <string name="create_new">Nieuw</string>
     <string name="color_red">Rood</string>
     <string name="color_pink">Roze</string>
     <string name="color_purple">Paars</string>
@@ -48,6 +49,7 @@
     <string name="menu_save_pdf">Opslaan als PDF-bestand</string>
     <string name="menu_shareClipboard">Kopiëren naar klembord</string>
     <string name="menu_other_searchSite">Zoek op site</string>
+    <string name="link_you_copied">Link gekopieerd</string>
     <!-- Dialog -->
     <string name="dialog_title_hint">Titel:</string>
     <string name="dialog_URL_hint">URL:</string>
@@ -64,6 +66,7 @@
     <string name="setting_label">Instellingen</string>
     <!-- browser setting -->
     <string name="setting_title_browser">Browserinstellingen</string>
+    <string name="setting_title_general">Algemeen</string>
     <string name="setting_title_search_engine">Zoekmachine</string>
     <string name="setting_summary_search_engine_google">Google</string>
     <string name="setting_summary_search_engine_duckduckgo">DuckDuckGo</string>
@@ -80,7 +83,9 @@
     <string name="privacy_redirect">Doorverwijzen</string>
     <string name="privacy_redirect_twitter">Twitter</string>
     <string name="privacy_redirect_youTube">YouTube</string>
-    <string name="privacy_redirect_inst">Instagram</string>
+    <string name="custom_redirects">Aangepaste Redirects</string>
+    <string name="source">Bron</string>
+    <string name="target">Doel</string>
     <string name="setting_title_save_data">Verzoek \'Gegevens opslaan\'</string>
     <string name="setting_title_profiles">Profielen</string>
     <string name="setting_title_profiles_edit">Profielen bewerken</string>
@@ -127,6 +132,7 @@
     <string name="setting_title_reload">Veeg omlaag om te herladen</string>
     <string name="setting_title_searchEngine">Aangepaste zoekmachine</string>
     <string name="setting_title_userAgent">Aangepaste user agent</string>
+    <string name="setting_title_clipboard_record">Clipboard bestanden</string>
     <string name="setting_title_fingerPrint">Vingerafdruk bescherming</string>
     <string name="setting_theme">Thema</string>
     <string name="setting_theme_system">Systeem</string>

@@ -3,11 +3,16 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <CheckBoxPreference
+
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="sp_drm"
+        android:summary="@string/hint_DRM_Media"/>
+
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="sp_autofill"
-        android:summary="@string/setting_summary_autofill"
-        android:title="@string/setting_title_autofill" />
+        android:summary="@string/setting_summary_autofill" />
 
     <PreferenceCategory android:title="@string/setting_title_profiles">
 
@@ -57,7 +62,7 @@
     <PreferenceCategory android:title="@string/privacy_redirect">
 
         <de.baumann.browser.preferences.EditTextSwitchPreference
-            android:defaultValue="https://invidious.snopyta.org/"
+            android:defaultValue="https://yewtu.be/"
             android:key="sp_youTube_string"
             android:selectable="true"
             android:title="@string/privacy_redirect_youTube"
@@ -72,13 +77,10 @@
             app:editTextSwitchKey="sp_twitter_switch"
             app:useSimpleSummaryProvider="true" />
 
-        <de.baumann.browser.preferences.EditTextSwitchPreference
-            android:defaultValue="https://bibliogram.pussthecat.org/"
-            android:key="sp_instagram_string"
+        <Preference
+            android:key="custom_redirects"
             android:selectable="true"
-            android:title="@string/privacy_redirect_inst"
-            app:editTextSwitchKey="sp_instagram_switch"
-            app:useSimpleSummaryProvider="true" />
+            android:title="@string/custom_redirects" />
 
     </PreferenceCategory>
 

@@ -8,7 +8,6 @@ import android.os.Bundle;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceGroup;
 
 import java.util.Objects;
@@ -17,11 +16,13 @@ import de.baumann.browser.R;
 import de.baumann.browser.activity.Settings_Backup;
 import de.baumann.browser.activity.Settings_Delete;
 import de.baumann.browser.activity.Settings_Filter;
+import de.baumann.browser.activity.Settings_General;
 import de.baumann.browser.activity.Settings_Gesture;
 import de.baumann.browser.activity.Settings_PrivacyActivity;
 import de.baumann.browser.activity.Settings_UI;
+import de.baumann.browser.preferences.BasePreferenceFragment;
 
-public class Fragment_settings extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class Fragment_settings extends BasePreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -67,6 +68,14 @@ public class Fragment_settings extends PreferenceFragmentCompat implements Share
         assert settings_start != null;
         settings_start.setOnPreferenceClickListener(preference -> {
             Intent intent = new Intent(getActivity(), Settings_PrivacyActivity.class);
+            requireActivity().startActivity(intent);
+            return false;
+        });
+
+        Preference settings_general = findPreference("settings_general");
+        assert settings_general != null;
+        settings_general.setOnPreferenceClickListener(preference -> {
+            Intent intent = new Intent(getActivity(), Settings_General.class);
             requireActivity().startActivity(intent);
             return false;
         });

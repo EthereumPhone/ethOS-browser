@@ -14,6 +14,7 @@
     <string name="album_title_home">Главная</string>
     <string name="album_title_tab">Открытые вкладки</string>
     <string name="search_hint">Поиск</string>
+    <string name="create_new">Новый</string>
     <string name="color_red">Красный</string>
     <string name="color_pink">Розовый</string>
     <string name="color_purple">Фиолетовый</string>
@@ -48,6 +49,7 @@
     <string name="menu_save_pdf">Сохранить в PDF</string>
     <string name="menu_shareClipboard">Копировать в буфер</string>
     <string name="menu_other_searchSite">Поиск по сайту</string>
+    <string name="link_you_copied">Ссылка скопирована</string>
     <!-- Dialog -->
     <string name="dialog_title_hint">Заголовок:</string>
     <string name="dialog_URL_hint">URL:</string>
@@ -64,6 +66,7 @@
     <string name="setting_label">Настройки</string>
     <!-- browser setting -->
     <string name="setting_title_browser">Настройки браузера</string>
+    <string name="setting_title_general">Общее</string>
     <string name="setting_title_search_engine">Поисковая система</string>
     <string name="setting_summary_search_engine_google">Google</string>
     <string name="setting_summary_search_engine_duckduckgo">DuckDuckGo</string>
@@ -80,7 +83,9 @@
     <string name="privacy_redirect">Перенаправить</string>
     <string name="privacy_redirect_twitter">Twitter</string>
     <string name="privacy_redirect_youTube">YouTube</string>
-    <string name="privacy_redirect_inst">Instagram</string>
+    <string name="custom_redirects">Пользовательские редиректы</string>
+    <string name="source">Источник</string>
+    <string name="target">Цель</string>
     <string name="setting_title_save_data">Запрос \'Сохранить данные\'</string>
     <string name="setting_title_profiles">Профили</string>
     <string name="setting_title_profiles_edit">Редактирование профилей</string>
@@ -127,13 +132,14 @@
     <string name="setting_title_reload">Проведите вниз, чтобы перезагрузить</string>
     <string name="setting_title_searchEngine">Пользовательская поисковая система</string>
     <string name="setting_title_userAgent">Произвольный юзер-агент</string>
+    <string name="setting_title_clipboard_record">Записи буфера обмена</string>
     <string name="setting_title_fingerPrint">Защита отпечатков пальцев</string>
     <string name="setting_theme">Тема</string>
     <string name="setting_theme_system">Система</string>
     <string name="setting_theme_OLED">OLED</string>
     <string name="setting_theme_wallpaper">На основе обоев</string>
     <!-- App behavior -->
-    <string name="setting_title_hideToolbar">Скрыть панель инструментов</string>
+    <string name="setting_title_hideToolbar">Скрываемая панель инструментов</string>
     <string name="setting_title_behavior">Поведение</string>
     <string name="setting_title_confirm_exit">Подтвердить выход из браузера</string>
     <string name="setting_title_confirm_tab_close">Подтвердить закрытие вкладки</string>

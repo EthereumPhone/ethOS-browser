@@ -10,7 +10,9 @@
     <FrameLayout
         android:id="@+id/main_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
 
     <ListView
         android:id="@+id/list_search"
@@ -46,8 +48,7 @@
         app:contentInsetEnd="0dp"
         app:contentInsetLeft="0dp"
         app:contentInsetRight="0dp"
-        app:contentInsetStart="0dp"
-        app:backgroundTint="?attr/colorSurface">
+        app:contentInsetStart="0dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -75,27 +76,35 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true">
+                    android:layout_centerVertical="true"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:id="@+id/main_progress_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:indeterminate="true"
+                        android:layout_margin="5dp"
+                        app:indicatorColor="?attr/colorAccent"
+                        app:indicatorSize="25dp"/>
 
                     <com.google.android.material.floatingactionbutton.FloatingActionButton
                         android:id="@+id/omniBox_tab"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginEnd="5dp"
-                        android:src="@drawable/icon_profile_standard"
-                        app:elevation="2dp"
-                        app:fabSize="mini"
-                        app:backgroundTint="?attr/colorSecondaryContainer"/>
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginStart="5dp"
+                        app:fabCustomSize="45dp"
+                        app:backgroundTint="?attr/colorSecondaryContainer" />
 
                     <com.google.android.material.floatingactionbutton.FloatingActionButton
                         android:id="@+id/omnibox_overview"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginStart="5dp"
-                        app:elevation="2dp"
-                        app:fabSize="mini"
+                        app:fabCustomSize="45dp"
                         app:backgroundTint="?attr/colorSecondaryContainer" />
 
                     <Button
@@ -129,15 +138,6 @@
                     android:textStyle="bold" />
 
             </RelativeLayout>
-
-
-            <com.google.android.material.progressindicator.LinearProgressIndicator
-                android:id="@+id/main_progress_bar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:indeterminate="true"
-                app:indicatorColor="?attr/colorAccent" />
 
             <RelativeLayout
                 android:id="@+id/searchBox"
