@@ -83,6 +83,8 @@ class WalletSDK(
 
                 if (gasPrice == null) {
                     gasPriceVAL = web3j?.ethGasPrice()?.sendAsync()?.get()?.gasPrice.toString()
+                    // Add 2% to gas price
+                    gasPriceVAL = gasPriceVAL?.let { BigInteger(it).multiply(BigInteger("102")).divide(BigInteger("100")).toString() }
                 }
 
 
@@ -116,6 +118,8 @@ class WalletSDK(
                     val txResult = web3j!!.ethSendRawTransaction(result).sendAsync().get()
                     if (txResult.hasError()) {
                         println("Transaction error: ${txResult.error.message}")
+                        completableFuture.complete(txResult.error.message)
+                        return@runAsync
                     }
                     val txHash = txResult.transactionHash
                     completableFuture.complete(txHash)
@@ -146,6 +150,28 @@ class WalletSDK(
             i += 2
         }
         return sb.toString()
+    }
+
+    fun waitForTxToBeValidated(txHash: String): CompletableFuture<Unit> {
+        val completableFuture = CompletableFuture<Unit>()
+        CompletableFuture.runAsync {
+            while (true) {
+                val receipt = web3j!!.ethGetTransactionReceipt(txHash).sendAsync().get()
+                if (receipt.hasError()) {
+                    println("Error: ${receipt.error.message}")
+                    completableFuture.completeExceptionally(Exception(receipt.error.message))
+                    return@runAsync
+                }
+                if (receipt.result != null) {
+                    println("Transaction validated!")
+                    completableFuture.complete(Unit)
+                    return@runAsync
+                }
+                Thread.sleep(1000)
+            }
+        }
+
+        return completableFuture
     }
 
     fun signMessage(messageT: String, typeT: String = "personal_sign"): CompletableFuture<String> {
