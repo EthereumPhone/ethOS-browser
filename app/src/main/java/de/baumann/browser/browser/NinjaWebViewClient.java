@@ -514,6 +514,9 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                    var result = window.AndroidEthereum.getBlockByNumber(request.params[0], request.params[1])\n" +
                 "                    console.log(\"Block_RESULT: \", result)\n" +
                 "                    resolve(JSON.parse(result))\n" +
+                "                } else if (request.method == 'eth_gasPrice') {\n" +
+                "                    var result = window.AndroidEthereum.getGasPrice()\n" +
+                "                    resolve(result)\n" +
                 "                } else {\n" +
                 "                    console.log(\"Method: \", request.method, \" Params: \", JSON.stringify(request.params))\n" +
                 "                    reject(new Error(\"Not cool method: \" + JSON.stringify(request)))\n" +

@@ -1,10 +1,13 @@
 package de.baumann.browser.browser
 
 import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -13,6 +16,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.TextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.app.NotificationCompat
 import de.baumann.browser.R
 import org.json.JSONArray
 import org.json.JSONObject
@@ -28,6 +32,7 @@ import java.lang.Long.parseLong
 import java.math.BigInteger
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.Random
 import java.util.concurrent.CompletableFuture
 
 
@@ -94,10 +99,10 @@ class AndroidEthereum(
                 )
             }
             10 -> {
-                web3j = Web3j.build(HttpService("https://endpoints.omniatech.io/v1/op/mainnet/public"))
+                web3j = Web3j.build(HttpService("https://mainnet.optimism.io"))
                 walletSDK = WalletSDK(
                     context = context,
-                    web3RPC = "https://endpoints.omniatech.io/v1/op/mainnet/public"
+                    web3RPC = "https://mainnet.optimism.io"
                 )
             }
             42161 -> {
@@ -123,6 +128,19 @@ class AndroidEthereum(
     }
 
     @JavascriptInterface
+    fun getGasPrice(): String {
+        val completableFuture = CompletableFuture<String>()
+        (context as Activity).runOnUiThread {
+            if (isEnabled[getDomainName(webView.url!!)] == true) {
+                completableFuture.complete(web3j.ethGasPrice().sendAsync().get().result)
+            } else {
+                completableFuture.complete("")
+            }
+        }
+        return completableFuture.get()
+    }
+
+    @JavascriptInterface
     fun getAddress(): String {
         val completableFuture = CompletableFuture<String>()
         (context as Activity).runOnUiThread {
@@ -143,7 +161,10 @@ class AndroidEthereum(
     fun tryToGetTx(txHash: String): Transaction? {
         val ethGetTransactionByHash = web3j.ethGetTransactionByHash(txHash).send()
         val result = ethGetTransactionByHash.result
-        println("ethGetTransactionByHash, got result")
+        if (result == null) {
+            Thread.sleep(500)
+            return tryToGetTx(txHash)
+        }
         return result
     }
     @JavascriptInterface
@@ -155,6 +176,7 @@ class AndroidEthereum(
         if (compFut.get()) {
             val completableFuture = CompletableFuture<String>()
             CompletableFuture.runAsync {
+                Thread.sleep(1000)
                 println("getTransactionByHash: waiting for tx receipt")
                 val txObj = tryToGetTx(txHash)
                 println("getTransactionByHash: got tx")
@@ -265,10 +287,66 @@ class AndroidEthereum(
                 gasPrice = if (txData.has("gasPrice")) hexToBigInteger(txData.getString("gasPrice")) else null,
                 chainId = Integer.parseInt(chainId)
             ).get()
-            return txHash
+            return if (txHash == null) {
+                "Transaction error: insufficient funds for gas * price + value"
+            } else {
+                if (txHash != WalletSDK.DECLINE) {
+                    showNotificationForTx(txHash)
+                    walletSDK.waitForTxToBeValidated(txHash).whenComplete { _, _ ->
+                        showValidatedNotificationForTx(txHash)
+                    }
+                }
+                txHash
+            }
         } else {
             return "0"
         }
+    }
+
+    private fun showNotificationForTx(txHash: String) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationId = Random().nextInt(100000)
+        val channelId = "channel-01"
+        val channelName = "Transactions Notifications"
+        val importance = NotificationManager.IMPORTANCE_HIGH
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val mChannel = NotificationChannel(
+                channelId, channelName, importance
+            )
+            notificationManager.createNotificationChannel(mChannel)
+        }
+
+        val mBuilder = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.browser_icon)
+            .setContentTitle("Transaction published")
+            .setContentText("Transaction published: $txHash")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        notificationManager.notify(notificationId, mBuilder.build())
+    }
+
+    private fun showValidatedNotificationForTx(txHash: String) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationId = Random().nextInt(100000)
+        val channelId = "channel-01"
+        val channelName = "Transactions Notifications"
+        val importance = NotificationManager.IMPORTANCE_HIGH
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val mChannel = NotificationChannel(
+                channelId, channelName, importance
+            )
+            notificationManager.createNotificationChannel(mChannel)
+        }
+
+        val mBuilder = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.browser_icon)
+            .setContentTitle("Transaction included in block")
+            .setContentText("Transaction included in block: $txHash")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        notificationManager.notify(notificationId, mBuilder.build())
     }
 
     @JavascriptInterface
@@ -370,15 +448,14 @@ class AndroidEthereum(
         if (compFut.get()) {
             return "null"
         }
-        val estimateCallWeb3j = Web3j.build(HttpService(chainRPC))
 
         val json = JSONObject(jsonStr)
         val to = json.getString("to")
         val data = json.getString("data")
         val value = if (json.has("value")) json.getString("value") else "0x0"
+        val from = if (json.has("from")) json.getString("from") else walletSDK.getAddress()
         // Estimate gas
-
-        val gas = estimateCallWeb3j.ethEstimateGas(
+        val gas = web3j.ethEstimateGas(
             org.web3j.protocol.core.methods.request.Transaction.createFunctionCallTransaction(
                 walletSDK.getAddress(),
                 null,
@@ -391,7 +468,10 @@ class AndroidEthereum(
         ).send()
         if (gas.hasError()) {
             println("Error: ${gas.error.message}")
-            return "null"
+            gas.error.data?.let {
+                println("Error data: ${gas.error.data}")
+            }
+            return gas.error.message
         }
         println(gas.amountUsed)
         return gas.amountUsed.toString()
@@ -491,6 +571,8 @@ class AndroidEthereum(
             (context as Activity).runOnUiThread {
                 webView.evaluateJavascript("window.ethereum.chainId=\"$chainId\"", null)
             }
+            this.chainId = hexToBigInteger(chainId)
+            initialSetBasedOnChainId()
             return chainId
         } else {
             return "0x1"
@@ -499,6 +581,13 @@ class AndroidEthereum(
 
     @JavascriptInterface
     fun enableWallet(): String {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled[getDomainName(webView.url!!)] == true)
+        }
+        if (compFut.get()) {
+            return walletSDK.getAddress()
+        }
         val completableFuture = CompletableFuture<String>()
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val params = WindowManager.LayoutParams(
