@@ -96,24 +96,24 @@ class AndroidEthereum(
                 )
             }
             10 -> {
-                web3j = Web3j.build(HttpService("https://mainnet.optimism.io"))
+                web3j = Web3j.build(HttpService("https://opt-mainnet.g.alchemy.com/v2/4CrNAPvukjJfB5UJYGLgqT_Q2HSkrnTP"))
                 walletSDK = WalletSDK(
                     context = context,
-                    web3RPC = "https://mainnet.optimism.io"
+                    web3RPC = "https://opt-mainnet.g.alchemy.com/v2/4CrNAPvukjJfB5UJYGLgqT_Q2HSkrnTP"
                 )
             }
             42161 -> {
-                web3j = Web3j.build(HttpService("https://arb1.arbitrum.io/rpc"))
+                web3j = Web3j.build(HttpService("https://arb-mainnet.g.alchemy.com/v2/nUK-9SVXiX2HYmdU-Pto7iPcPEm--euD"))
                 walletSDK = WalletSDK(
                     context = context,
-                    web3RPC = "https://arb1.arbitrum.io/rpc"
+                    web3RPC = "https://arb-mainnet.g.alchemy.com/v2/nUK-9SVXiX2HYmdU-Pto7iPcPEm--euD"
                 )
             }
             5 -> {
-                web3j = Web3j.build(HttpService("https://rpc.ankr.com/eth_goerli"))
+                web3j = Web3j.build(HttpService("https://eth-goerli.g.alchemy.com/v2/wEno3MttLG5usiVg4xL5_dXrDy_QH95f"))
                 walletSDK = WalletSDK(
                     context = context,
-                    web3RPC = "https://rpc.ankr.com/eth_goerli"
+                    web3RPC = "https://eth-goerli.g.alchemy.com/v2/wEno3MttLG5usiVg4xL5_dXrDy_QH95f"
                 )
             }
         }
