@@ -96,6 +96,7 @@ public class NinjaWebView extends WebView implements AlbumController {
     private boolean foreground;
     private static BrowserController browserController = null;
 
+    private AndroidEthereum androidEthereum = null;
     public NinjaWebView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -144,7 +145,8 @@ public class NinjaWebView extends WebView implements AlbumController {
         initWebView();
         initAlbum();
 
-        this.addJavascriptInterface(new AndroidEthereum(context, this), "AndroidEthereum");
+        androidEthereum = new AndroidEthereum(context, this);
+        this.addJavascriptInterface(androidEthereum, "AndroidEthereum");
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -690,6 +692,7 @@ public class NinjaWebView extends WebView implements AlbumController {
         clearHistory();
         setVisibility(GONE);
         removeAllViews();
+        androidEthereum.stop();
         super.destroy();
     }
 

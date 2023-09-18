@@ -31,11 +31,12 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.Random
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 class AndroidEthereum(
     private val context: Context,
-    private val webView: WebView
+    private val webView: WebView,
 ) {
 
     private var isEnabled = MyHashMapManager(context)
@@ -47,7 +48,7 @@ class AndroidEthereum(
         web3RPC = chainRPC
     )
 
-    private var isRunning = true
+    private val atomicBoolean = AtomicBoolean(true)
 
     // FrameLayout from activity_main.xml
     var view = (context as Activity).findViewById<CoordinatorLayout>(R.id.main_layout)
@@ -55,11 +56,17 @@ class AndroidEthereum(
     var web3j = Web3j.build(HttpService(chainRPC))
 
     init {
+        println("CLOSED: NEW ANDROID ETHEREUM")
         chainId = walletSDK.getChainId().toString()
         initialSetBasedOnChainId()
         CompletableFuture.runAsync {
             Thread.sleep(10000)
-            while (isRunning) {
+            while (atomicBoolean.get()) {
+                (context as Activity).runOnUiThread {
+                    if (webView.contentHeight == 0) {
+                        atomicBoolean.set(false)
+                    }
+                }
                 val newestChainIdNotHex = walletSDK.getChainId()
 
                 (context as Activity).runOnUiThread {
@@ -80,6 +87,10 @@ class AndroidEthereum(
 
     private fun toHexString(i: Int): String {
         return "0x" + Integer.toHexString(i)
+    }
+
+    fun stop() {
+        atomicBoolean.set(false)
     }
 
     fun initialSetBasedOnChainId() {

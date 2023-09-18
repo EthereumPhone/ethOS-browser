@@ -7,6 +7,8 @@ import org.web3j.protocol.http.HttpService
 import java.util.concurrent.CompletableFuture
 import java.lang.Long.parseLong
 import java.math.BigInteger
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 class WalletSDK(
     context: Context,
@@ -273,7 +275,13 @@ class WalletSDK(
                     )
                 )
             }
-            return completableFuture.get()
+            return try {
+                val getResult = completableFuture.get(50, TimeUnit.MILLISECONDS)
+                getResult
+            } catch (e: TimeoutException) {
+                println("Retrying getChainId")
+                getChainId()
+            }
         } else {
             throw Exception("No system wallet found")
         }

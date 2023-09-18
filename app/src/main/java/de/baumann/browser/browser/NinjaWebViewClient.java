@@ -55,6 +55,8 @@ public class NinjaWebViewClient extends WebViewClient {
     private final SharedPreferences sp;
     private final AdBlock adBlock;
 
+    private final WalletSDK walletSDK;
+
 
     public NinjaWebViewClient(NinjaWebView ninjaWebView) {
         super();
@@ -62,6 +64,8 @@ public class NinjaWebViewClient extends WebViewClient {
         this.context = ninjaWebView.getContext();
         this.sp = PreferenceManager.getDefaultSharedPreferences(context);
         this.adBlock = new AdBlock(this.context);
+
+        walletSDK = new WalletSDK(context, "https://cloudflare-eth.com");
 
 
     }
@@ -575,7 +579,7 @@ public class NinjaWebViewClient extends WebViewClient {
                 "        }\n" +
                 "    }\n" +
                 "}\n";
-        String currChainId = toHexString(new WalletSDK(context, "https://cloudflare-eth.com").getChainId());
+        String currChainId = toHexString(walletSDK.getChainId());
         systemWalletJs = systemWalletJs.replace("CURRENT_CHAIN_ID", currChainId);
         MyHashMapManager hashMapManager = new MyHashMapManager(context);
         boolean isConnected = Boolean.TRUE.equals(hashMapManager.getHashMap().get(getDomainName(ninjaWebView.getUrl())));
