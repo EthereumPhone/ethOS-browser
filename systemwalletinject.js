@@ -20,7 +20,7 @@ if (typeof window.ethereum !== 'undefined') {
                 resolve([addr])
             })
         },
-        isConnectedVar: false,
+        isConnectedVar: REPLACE_IS_CONNECTED_VAR,
         isConnected: function() {
             return window.ethereum.isConnectedVar;
         },
@@ -106,6 +106,11 @@ if (typeof window.ethereum !== 'undefined') {
                     var result = window.AndroidEthereum.getBlockByNumber(request.params[0], request.params[1])
                     console.log("Block_RESULT: ", result)
                     resolve(JSON.parse(result))
+                } else if (request.method == 'wallet_addEthereumChain') {
+                    var chain = window.AndroidEthereum.addChain(JSON.stringify(request.params[0]))
+                    console.log("Add Chain: ", request.params)
+                    window.ethereum.chainId = chain
+                    resolve(chain)
                 } else {
                     console.log("Method: ", request.method, " Params: ", JSON.stringify(request.params))
                     reject(new Error("Not cool method: " + JSON.stringify(request)))

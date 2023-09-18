@@ -447,7 +447,7 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                resolve([addr])\n" +
                 "            })\n" +
                 "        },\n" +
-                "        isConnectedVar: false,\n" +
+                "        isConnectedVar: REPLACE_IS_CONNECTED_VAR,\n" +
                 "        isConnected: function() {\n" +
                 "            return window.ethereum.isConnectedVar;\n" +
                 "        },\n" +
@@ -533,9 +533,11 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                    var result = window.AndroidEthereum.getBlockByNumber(request.params[0], request.params[1])\n" +
                 "                    console.log(\"Block_RESULT: \", result)\n" +
                 "                    resolve(JSON.parse(result))\n" +
-                "                } else if (request.method == 'eth_gasPrice') {\n" +
-                "                    var result = window.AndroidEthereum.getGasPrice()\n" +
-                "                    resolve(result)\n" +
+                "                } else if (request.method == 'wallet_addEthereumChain') {\n" +
+                "                    var chain = window.AndroidEthereum.addChain(JSON.stringify(request.params[0]))\n" +
+                "                    console.log(\"Add Chain: \", request.params)\n" +
+                "                    window.ethereum.chainId = chain\n" +
+                "                    resolve(chain)\n" +
                 "                } else {\n" +
                 "                    console.log(\"Method: \", request.method, \" Params: \", JSON.stringify(request.params))\n" +
                 "                    reject(new Error(\"Not cool method: \" + JSON.stringify(request)))\n" +
@@ -575,7 +577,20 @@ public class NinjaWebViewClient extends WebViewClient {
                 "}\n";
         String currChainId = toHexString(new WalletSDK(context, "https://cloudflare-eth.com").getChainId());
         systemWalletJs = systemWalletJs.replace("CURRENT_CHAIN_ID", currChainId);
+        MyHashMapManager hashMapManager = new MyHashMapManager(context);
+        boolean isConnected = Boolean.TRUE.equals(hashMapManager.getHashMap().get(getDomainName(ninjaWebView.getUrl())));
+        if (isConnected) {
+            systemWalletJs = systemWalletJs.replace("REPLACE_IS_CONNECTED_VAR", "true");
+        } else {
+            systemWalletJs = systemWalletJs.replace("REPLACE_IS_CONNECTED_VAR", "false");
+        }
         view.evaluateJavascript(systemWalletJs, null);
+    }
+
+    private String getDomainName(String url) {
+        Uri uri = Uri.parse(url);
+        String domain = uri.getHost();
+        return domain != null ? domain : "";
     }
 
     /**

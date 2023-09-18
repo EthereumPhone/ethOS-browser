@@ -38,7 +38,7 @@ class AndroidEthereum(
     private val webView: WebView
 ) {
 
-    private var isEnabled = HashMap<String, Boolean>()
+    private var isEnabled = MyHashMapManager(context)
     private val chainRPC = "https://eth-mainnet.g.alchemy.com/v2/AH4YE6gtBXoZf2Um-Z8Xr-6noHSZocKq"
     var chainId: String
 
@@ -128,7 +128,7 @@ class AndroidEthereum(
     fun getGasPrice(): String {
         val completableFuture = CompletableFuture<String>()
         (context as Activity).runOnUiThread {
-            if (isEnabled[getDomainName(webView.url!!)] == true) {
+            if (isEnabled.getHashMap()[getDomainName(webView.url!!)] == true) {
                 completableFuture.complete(web3j.ethGasPrice().sendAsync().get().result)
             } else {
                 completableFuture.complete("")
@@ -141,7 +141,7 @@ class AndroidEthereum(
     fun getAddress(): String {
         val completableFuture = CompletableFuture<String>()
         (context as Activity).runOnUiThread {
-            if (isEnabled[getDomainName(webView.url!!)] == true) {
+            if (isEnabled.getHashMap()[getDomainName(webView.url!!)] == true) {
                 completableFuture.complete(walletSDK.getAddress())
             } else {
                 completableFuture.complete("")
@@ -164,11 +164,76 @@ class AndroidEthereum(
         }
         return result
     }
+
+    @JavascriptInterface
+    fun addChain(chainObj: String): String {
+        val compFut = CompletableFuture<Boolean>()
+        (context as Activity).runOnUiThread {
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)
+        }
+        if (compFut.get()) {
+            return "0x1"
+        }
+
+        val completableFuture = CompletableFuture<String>()
+        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.RGBA_8888
+        )
+        params.gravity = Gravity.CENTER or Gravity.BOTTOM
+
+        val mainView = inflater.inflate(R.layout.enablelayout, null)
+
+        val acceptButton = mainView.findViewById<com.google.android.material.button.MaterialButton>(R.id.acceptbtn)
+        val declineButton = mainView.findViewById<com.google.android.material.button.MaterialButton>(R.id.declinebtn)
+        val text = mainView.findViewById<TextView>(R.id.choosemethod)
+        (context as Activity).runOnUiThread {
+            text.setText("Do you want to switch chain to ${JSONObject(chainObj).getString("chainName")}?")
+        }
+
+        acceptButton.setOnClickListener {
+            (context as Activity).runOnUiThread {
+                view.removeView(mainView)
+            }
+            val chain = JSONObject(chainObj)
+            val chainId = chain.getString("chainId")
+            val rpcUrls = chain.getJSONArray("rpcUrls")
+            walletSDK = WalletSDK(
+                context = context,
+                web3RPC = rpcUrls.getString(0)
+            )
+            web3j = Web3j.build(HttpService(rpcUrls.getString(0)))
+            val newChainId = Integer.parseInt(hexToBigInteger(chainId))
+            val result = walletSDK.changeChainId(newChainId).get()
+            if (result == "done") {
+                this.chainId = hexToBigInteger(chainId)
+                completableFuture.complete(chainId)
+            } else {
+                completableFuture.complete("0x1")
+            }
+        }
+
+        declineButton.setOnClickListener {
+            (context as Activity).runOnUiThread {
+                view.removeView(mainView)
+            }
+            completableFuture.complete("0x1")
+        }
+        (context as Activity).runOnUiThread {
+            view.addView(mainView, params)
+        }
+
+        return completableFuture.get()
+    }
     @JavascriptInterface
     fun getTransactionByHash(txHash: String): String {
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled[getDomainName(webView.url!!)] == true)
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == true)
         }
         if (compFut.get()) {
             val completableFuture = CompletableFuture<String>()
@@ -216,7 +281,7 @@ class AndroidEthereum(
     fun getTransactionReceipt(txHash: String): String {
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled[getDomainName(webView.url!!)] == true)
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == true)
         }
         if (compFut.get()) {
             val completableFuture = CompletableFuture<String>()
@@ -272,7 +337,7 @@ class AndroidEthereum(
     ): String {
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled[getDomainName(webView.url!!)] == true)
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == true)
         }
         if (compFut.get()) {
             val txData = JSONObject(transaction)
@@ -353,7 +418,7 @@ class AndroidEthereum(
     ): String {
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)
         }
         if (compFut.get()) {
             return "0"
@@ -384,7 +449,7 @@ class AndroidEthereum(
         println("signTypedData: $typedData")
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)
         }
         if (compFut.get()) {
             return "0"
@@ -396,7 +461,7 @@ class AndroidEthereum(
     fun getBlocknumber(): String {
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)
         }
         if (compFut.get()) {
             return "0x0"
@@ -410,7 +475,7 @@ class AndroidEthereum(
     ): String {
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)
         }
         if (compFut.get()) {
             return "0"
@@ -440,7 +505,7 @@ class AndroidEthereum(
     ): String {
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)
         }
         if (compFut.get()) {
             return "null"
@@ -478,7 +543,7 @@ class AndroidEthereum(
     fun getBlockByNumber(blockParamter: String, detailFlag: Boolean): String {
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)
         }
         if (compFut.get()) {
             return "0"
@@ -557,7 +622,7 @@ class AndroidEthereum(
     fun switchChain(chainId: String): String {
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled[getDomainName(webView.url!!)] == false)
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)
         }
         if (compFut.get()) {
             return "0x1"
@@ -580,7 +645,7 @@ class AndroidEthereum(
     fun enableWallet(): String {
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled[getDomainName(webView.url!!)] == true)
+            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == true)
         }
         if (compFut.get()) {
             return walletSDK.getAddress()
@@ -606,7 +671,7 @@ class AndroidEthereum(
         }
 
         acceptButton.setOnClickListener {
-            isEnabled[getDomainName(webView.url!!)] = true
+            isEnabled.updateHashMap(getDomainName(webView.url!!), true)
             (context as Activity).runOnUiThread {
                 view.removeView(mainView)
             }
@@ -614,7 +679,7 @@ class AndroidEthereum(
         }
 
         declineButton.setOnClickListener {
-            isEnabled[getDomainName(webView.url!!)] = false
+            isEnabled.updateHashMap(getDomainName(webView.url!!), false)
             (context as Activity).runOnUiThread {
                 view.removeView(mainView)
             }
