@@ -391,7 +391,7 @@ class AndroidEthereum(
         }
 
         val mBuilder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.browser_icon)
+            .setSmallIcon(R.drawable.notification_icon)
             .setContentTitle("Transaction published")
             .setContentText("Transaction published: $txHash")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -414,7 +414,7 @@ class AndroidEthereum(
         }
 
         val mBuilder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.browser_icon)
+            .setSmallIcon(R.drawable.notification_icon)
             .setContentTitle("Transaction included in block")
             .setContentText("Transaction included in block: $txHash")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
