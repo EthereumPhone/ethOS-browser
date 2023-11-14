@@ -429,154 +429,106 @@ public class NinjaWebViewClient extends WebViewClient {
                 view.evaluateJavascript("" + "Object.defineProperty(navigator, 'mediaDevices',{value:null});", null);
         }
         // Inject EIP-1193 provider
-        String systemWalletJs = "if (typeof window.ethereum !== 'undefined') {\n" +
-                "    window.ethereum\n" +
+        String systemWalletJs = "if (window.ethereum) {\n" +
+                "    console.log('Ethereum provider is already defined.');\n" +
                 "} else {\n" +
-                "    \n" +
                 "    window.ethereum = {\n" +
-                "        isMetaMask: true,\n" +
+                "        isMetaMask: true, // Assuming you want to mimic MetaMask functionality\n" +
                 "        selectedAddress: null,\n" +
-                "        chainId: \"CURRENT_CHAIN_ID\",\n" +
-                "        savedChainChangedCallback: null,\n" +
-                "        enable: function() {\n" +
-                "            return new Promise(function(resolve, reject) {\n" +
-                "                if (window.ethereum.selectedAddress != null) {\n" +
-                "                    resolve([window.ethereum.selectedAddress])\n" +
-                "                    return\n" +
-                "                }\n" +
-                "                var addr = window.AndroidEthereum.enableWallet()\n" +
-                "                console.log(\"Request Accounts: \", addr)\n" +
-                "                window.ethereum.selectedAddress = addr\n" +
-                "                window.ethereum.isConnectedVar = true\n" +
-                "                resolve([addr])\n" +
-                "            })\n" +
+                "        chainId: 'CURRENT_CHAIN_ID', // Replace with the actual chain ID in hexadecimal format\n" +
+                "        enable: async function() {\n" +
+                "            console.log(\"ENABLE\")\n" +
+                "            if (this.selectedAddress) {\n" +
+                "                return [this.selectedAddress];\n" +
+                "            }\n" +
+                "            try {\n" +
+                "                const addr = await window.AndroidEthereum.enableWallet();\n" +
+                "                this.selectedAddress = addr;\n" +
+                "                this.isConnectedVar = true;\n" +
+                "                return [addr];\n" +
+                "            } catch (error) {\n" +
+                "                throw new Error('User denied account access');\n" +
+                "                console.log(\"ERROR: \" + error)\n" +
+                "            }\n" +
                 "        },\n" +
-                "        isConnectedVar: REPLACE_IS_CONNECTED_VAR,\n" +
+                "        isConnectedVar: false,\n" +
                 "        isConnected: function() {\n" +
-                "            return window.ethereum.isConnectedVar;\n" +
+                "            return this.isConnectedVar;\n" +
                 "        },\n" +
-                "        request: function(request) {\n" +
-                "            console.log(\"Request: \", JSON.stringify(request))\n" +
-                "            return new Promise(function(resolve, reject) {\n" +
-                "                console.log(\"Method dude: \", request.method, \" Params dd: \", JSON.stringify(request.params))\n" +
-                "                if (request.method == 'eth_requestAccounts') {\n" +
-                "                    console.log(\"Selected Address: \", window.ethereum.selectedAddress)\n" +
-                "                    if (window.ethereum.selectedAddress != null) {\n" +
-                "                        resolve([window.ethereum.selectedAddress])\n" +
-                "                        return\n" +
+                "        request: async function(request) {\n" +
+                "            console.log(\"NEW REQUEST: \" + JSON.stringify(request))\n" +
+                "            switch (request.method) {\n" +
+                "                case 'eth_requestAccounts':\n" +
+                "                    return this.enable();\n" +
+                "                case 'wallet_switchEthereumChain':\n" +
+                "                    if (!request.params || !request.params[0].chainId) {\n" +
+                "                        throw new Error('Invalid input parameters');\n" +
                 "                    }\n" +
-                "                    var addr = window.AndroidEthereum.enableWallet()\n" +
-                "                    console.log(\"Request Accounts: \", addr)\n" +
-                "                    window.ethereum.selectedAddress = addr\n" +
-                "                    window.ethereum.isConnectedVar = true\n" +
-                "                    resolve([addr])\n" +
-                "                } else if (request.method == 'wallet_switchEthereumChain') {\n" +
-                "                    var chainId = request.params[0].chainId\n" +
-                "                    var chain = window.AndroidEthereum.switchChain(chainId)\n" +
-                "                    console.log(\"Switch Chain: \", chain)\n" +
-                "                    window.ethereum.chainId = chain\n" +
-                "                    resolve(chain)\n" +
-                "                } else if (request.method == 'eth_accounts') {\n" +
-                "                    var addr = window.AndroidEthereum.getAddress()\n" +
-                "                    selectedAddress = addr\n" +
-                "                    resolve([addr])\n" +
-                "                } else if (request.method == 'eth_sendTransaction') {\n" +
-                "                    console.log(\"Send Transaction: \", JSON.stringify(request.params))\n" +
-                "                    var tx = window.AndroidEthereum.signTransaction(JSON.stringify(request.params[0]))\n" +
-                "                    resolve(tx)\n" +
-                "                } else if (request.method == 'eth_sign') {\n" +
-                "                    var sig = window.AndroidEthereum.signMessage(request.params[1], request.method)\n" +
-                "                    if (sig == \"declined\") {\n" +
-                "                        reject(new Error(4001, 'User rejected the request'))\n" +
+                "                    this.chainId = request.params[0].chainId;\n" +
+                "                    return await window.AndroidEthereum.switchChain(this.chainId);\n" +
+                "                case 'eth_accounts':\n" +
+                "                    return [this.selectedAddress];\n" +
+                "                case 'eth_sendTransaction':\n" +
+                "                    if (!request.params || !request.params[0]) {\n" +
+                "                        throw new Error('Invalid input parameters');\n" +
                 "                    }\n" +
-                "                    resolve(sig)\n" +
-                "                } else if (request.method == 'personal_sign') {\n" +
-                "                    var sig = window.AndroidEthereum.signMessage(request.params[0], request.method)\n" +
-                "                    resolve(sig)\n" +
-                "                } else if (request.method == 'eth_signTypedData') {\n" +
-                "                    console.log(\"Typed Data V1: \", JSON.stringify(request.params[1]))\n" +
-                "                    var sig = window.AndroidEthereum.signMessage(JSON.stringify(request.params[1]), request.method)\n" +
-                "                    resolve(sig)\n" +
-                "                } else if (request.method == 'eth_signTypedData_v3') {\n" +
-                "                    console.log(\"Typed Data: \", JSON.stringify(request.params[1]))\n" +
-                "                    var sig = window.AndroidEthereum.signTypedData(JSON.stringify(request.params[1]))\n" +
-                "                    resolve(sig)\n" +
-                "                } else if (request.method == 'eth_signTypedData_v4') {\n" +
-                "                    console.log(\"Typed Data V4: \", JSON.stringify(request.params[1]))\n" +
-                "                    var sig = window.AndroidEthereum.signMessage(JSON.stringify(request.params[1]), \"eth_signTypedData\")\n" +
-                "                    resolve(sig)\n" +
-                "                } else if (request.method == 'eth_chainId') {\n" +
-                "                    var newestChainId = window.AndroidEthereum.getNewestChainId()\n" +
-                "                    resolve(newestChainId)\n" +
-                "                } else if (request.method == 'net_version') {\n" +
-                "                    resolve(1)\n" +
-                "                } else if (request.method == 'eth_blockNumber') {\n" +
-                "                    var blocknumber = window.AndroidEthereum.getBlocknumber()\n" +
-                "                    resolve(blocknumber)\n" +
-                "                } else if (request.method == 'eth_call') {\n" +
-                "                    var call = window.AndroidEthereum.ethCall(JSON.stringify(request.params[0]))\n" +
-                "                    resolve(call)\n" +
-                "                } else if (request.method == 'eth_estimateGas') {\n" +
-                "                    var gas = window.AndroidEthereum.estimateGas(JSON.stringify(request.params[0]))\n" +
-                "                    resolve(gas)\n" +
-                "                } else if (request.method == 'eth_getTransactionByHash') {\n" +
-                "                    var jsonStr = window.AndroidEthereum.getTransactionByHash(request.params[0])\n" +
-                "                    console.log(\"Transaction-result: \", jsonStr)\n" +
-                "                    if (jsonStr == \"0\") {\n" +
-                "                        resolve({})\n" +
+                "                    return await window.AndroidEthereum.signTransaction(JSON.stringify(request.params[0]));\n" +
+                "                case 'eth_sign':\n" +
+                "                    return window.AndroidEthereum.signMessage(request.params[1], 'eth_sign');\n" +
+                "                case 'personal_sign':\n" +
+                "                    return window.AndroidEthereum.signMessage(request.params[0], 'personal_sign');\n" +
+                "                case 'eth_signTypedData':\n" +
+                "                case 'eth_signTypedData_v3':\n" +
+                "                case 'eth_signTypedData_v4':\n" +
+                "                    return await window.AndroidEthereum.signTypedData(JSON.stringify(request.params[1]));\n" +
+                "                case 'eth_chainId':\n" +
+                "                    return this.chainId;\n" +
+                "                case 'net_version':\n" +
+                "                    return '1'; // Replace with the correct network version if needed\n" +
+                "                case 'eth_blockNumber':\n" +
+                "                    return window.AndroidEthereum.getBlockNumber();\n" +
+                "                case 'eth_call':\n" +
+                "                    if (!request.params || !request.params[0]) {\n" +
+                "                        throw new Error('Invalid input parameters');\n" +
                 "                    }\n" +
-                "                    resolve(JSON.parse(jsonStr))\n" +
-                "                } else if (request.method == 'eth_getTransactionReceipt') {\n" +
-                "                    var jsonStr = window.AndroidEthereum.getTransactionReceipt(request.params[0])\n" +
-                "                    console.log(\"Transaction-receipt: \", jsonStr)\n" +
-                "                    if (jsonStr == \"0\") {\n" +
-                "                        resolve(null)\n" +
+                "                    return window.AndroidEthereum.ethCall(JSON.stringify(request.params[0]));\n" +
+                "                case 'eth_estimateGas':\n" +
+                "                    if (!request.params || !request.params[0]) {\n" +
+                "                        throw new Error('Invalid input parameters');\n" +
                 "                    }\n" +
-                "                    resolve(JSON.parse(jsonStr))\n" +
-                "                } else if (request.method == 'eth_getBlockByNumber') {\n" +
-                "                    var result = window.AndroidEthereum.getBlockByNumber(request.params[0], request.params[1])\n" +
-                "                    console.log(\"Block_RESULT: \", result)\n" +
-                "                    resolve(JSON.parse(result))\n" +
-                "                } else if (request.method == 'wallet_addEthereumChain') {\n" +
-                "                    var chain = window.AndroidEthereum.addChain(JSON.stringify(request.params[0]))\n" +
-                "                    console.log(\"Add Chain: \", request.params)\n" +
-                "                    window.ethereum.chainId = chain\n" +
-                "                    resolve(chain)\n" +
-                "                } else {\n" +
-                "                    console.log(\"Method: \", request.method, \" Params: \", JSON.stringify(request.params))\n" +
-                "                    reject(new Error(\"Not cool method: \" + JSON.stringify(request)))\n" +
-                "                }\n" +
-                "            })\n" +
+                "                    return window.AndroidEthereum.estimateGas(JSON.stringify(request.params[0]));\n" +
+                "                case 'eth_getTransactionByHash':\n" +
+                "                    var txByHash = await window.AndroidEthereum.getTransactionByHash(request.params[0]);\n" +
+                "                    return JSON.parse(txByHash)\n" +
+                "                case 'eth_getTransactionReceipt':\n" +
+                "                    var txReceipt = await window.AndroidEthereum.getTransactionReceipt(request.params[0]);\n" +
+                "                    return JSON.parse(txReceipt)\n" +
+                "                case 'eth_getBlockByNumber':\n" +
+                "                    return window.AndroidEthereum.getBlockByNumber(request.params[0], request.params[1]);\n" +
+                "                case 'wallet_addEthereumChain':\n" +
+                "                    if (!request.params || !request.params[0]) {\n" +
+                "                        throw new Error('Invalid input parameters');\n" +
+                "                    }\n" +
+                "                    this.chainId = request.params[0].chainId;\n" +
+                "                    return await window.AndroidEthereum.addChain(JSON.stringify(request.params[0]));\n" +
+                "                default:\n" +
+                "                    throw new Error(`Unsupported method: ${request.method}`);\n" +
+                "            }\n" +
                 "        },\n" +
                 "        on: function(event, callback) {\n" +
-                "            console.log(\"On Event: \", event)\n" +
-                "            if (event == 'accountsChanged') {\n" +
-                "                (function refresh_wallet() {\n" +
-                "                    if(window.ethereum.selectedAddress != null) {\n" +
-                "                        callback([window.ethereum.selectedAddress])\n" +
-                "                        return\n" +
-                "                    }\n" +
-                "                    setTimeout( refresh_wallet, 5000 );\n" +
-                "                })();\n" +
-                "            } else if (event == 'chainChanged') {\n" +
-                "                //callback(1)\n" +
-                "                window.ethereum.savedChainChangedCallback = callback\n" +
-                "            } else if (event == 'networkChanged') {\n" +
-                "                //callback(1)\n" +
-                "                //window.ethereum.savedChainChangedCallback = callback\n" +
-                "            } else if (event == 'connect') {\n" +
-                "                (function my_func() {\n" +
-                "                    if(window.ethereum.isConnected() == true) {\n" +
-                "                        callback({\n" +
-                "                            chainId: window.ethereum.chainId,\n" +
-                "                        })\n" +
-                "                        return\n" +
-                "                    }\n" +
-                "                    setTimeout( my_func, 5000 );\n" +
-                "                })();\n" +
-                "                \n" +
-                "            }\n" +
+                "            console.log(\"Subscribed to event:\", event);\n" +
+                "            // You should implement a mechanism in your Android code to trigger these callbacks\n" +
+                "            // when the relevant events occur. This could be done by invoking JavaScript from\n" +
+                "            // Android when the event happens.\n" +
+                "            // ...\n" +
                 "        }\n" +
+                "    };\n" +
+                "\n" +
+                "    // Trigger the 'connect' event if already connected\n" +
+                "    if (window.ethereum.isConnected()) {\n" +
+                "        window.ethereum.on('connect', function(info) {\n" +
+                "            console.log('Ethereum provider connected with chainId:', info.chainId);\n" +
+                "        });\n" +
                 "    }\n" +
                 "}\n";
         String currChainId = toHexString(walletSDK.getChainId());

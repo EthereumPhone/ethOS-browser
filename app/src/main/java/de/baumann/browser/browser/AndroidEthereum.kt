@@ -127,6 +127,13 @@ class AndroidEthereum(
                     web3RPC = "https://eth-goerli.g.alchemy.com/v2/wEno3MttLG5usiVg4xL5_dXrDy_QH95f"
                 )
             }
+            7777777 -> {
+                web3j = Web3j.build(HttpService("https://rpc.zora.energy"))
+                walletSDK = WalletSDK(
+                    context = context,
+                    web3RPC = "https://rpc.zora.energy"
+                )
+            }
         }
     }
 
@@ -243,104 +250,130 @@ class AndroidEthereum(
     @JavascriptInterface
     fun getTransactionByHash(txHash: String): String {
         val compFut = CompletableFuture<Boolean>()
+
+        // Run the domain check on the UI thread.
         (context as Activity).runOnUiThread {
             compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == true)
         }
-        if (compFut.get()) {
-            val completableFuture = CompletableFuture<String>()
-            CompletableFuture.runAsync {
-                Thread.sleep(1000)
-                println("getTransactionByHash: waiting for tx receipt")
-                val txObj = tryToGetTx(txHash)
-                println("getTransactionByHash: got tx")
-                if (txObj != null) {
-                    println("getTransactionByHash: tx is not null; building json")
-                    val jsonObject = JSONObject()
+
+        try {
+            // Proceed only if the domain is enabled.
+            if (compFut.get()) {
+                val transactionFuture = CompletableFuture<String>()
+
+                CompletableFuture.runAsync {
                     try {
-                        jsonObject.put("r", txObj.r)
-                        jsonObject.put("s", txObj.s)
-                        jsonObject.put("blockHash", if (txObj.blockHash == null) null else txObj.blockHash)
-                        jsonObject.put("from", txObj.from)
-                        jsonObject.put("hash", txObj.hash)
-                        jsonObject.put("input", txObj.input)
-                        jsonObject.put("to", txObj.to)
-                        jsonObject.put("v", txObj.v)
-                        jsonObject.put("blockNumber", if (txObj.blockNumberRaw == null) null else txObj.blockNumber)
-                        jsonObject.put("gas", txObj.gas)
-                        jsonObject.put("gasPrice", txObj.gasPrice)
-                        jsonObject.put("nonce", txObj.nonce)
-                        jsonObject.put("transactionIndex", if (txObj.transactionIndexRaw == null) null else txObj.transactionIndex)
-                        jsonObject.put("value", web3j.ethGetTransactionByHash(txHash).sendAsync().get().result.value.toString())
+                        println("getTransactionByHash: waiting for tx receipt")
+                        val txObj = tryToGetTx(txHash)
+                        println("getTransactionByHash: got tx")
+
+                        val jsonObject = JSONObject().apply {
+                            if (txObj != null) {
+                                println("getTransactionByHash: tx is not null; building json")
+                                put("r", txObj.r)
+                                put("s", txObj.s)
+                                put("blockHash", txObj.blockHash)
+                                put("from", txObj.from)
+                                put("hash", txObj.hash)
+                                put("input", txObj.input)
+                                put("to", txObj.to)
+                                put("v", txObj.v)
+                                put("blockNumber", txObj.blockNumberRaw)
+                                put("gas", txObj.gas)
+                                put("gasPrice", txObj.gasPrice)
+                                put("nonce", txObj.nonce)
+                                put("transactionIndex", txObj.transactionIndexRaw)
+                                put("value", txObj.value.toString()) // Assuming txObj.value is already a String type or has a meaningful toString() implementation.
+                            } else {
+                                put("error", "Transaction not found")
+                            }
+                        }
+
+                        println("getTransactionByHash: json built")
+                        transactionFuture.complete(jsonObject.toString())
                     } catch (e: Exception) {
                         println("getTransactionByHash: error building json")
                         e.printStackTrace()
+                        transactionFuture.complete(JSONObject().put("error", "Exception occurred: ${e.message}").toString())
                     }
-
-                    println("getTransactionByHash: json built")
-                    completableFuture.complete(jsonObject.toString())
-                } else {
-                    completableFuture.complete("{}")
                 }
+
+                // Return the result of the future.
+                return transactionFuture.get()
             }
-            return completableFuture.get()
-        } else {
-            return "{}"
+        } catch (e: Exception) {
+            // Handle exceptions from future operations.
+            e.printStackTrace()
         }
+
+        // If we reach this point, either the domain is not enabled or an exception occurred.
+        return JSONObject().put("error", "Domain is not enabled or an error occurred").toString()
     }
 
     @JavascriptInterface
     fun getTransactionReceipt(txHash: String): String {
         val compFut = CompletableFuture<Boolean>()
+
+        // Run check on UI thread to determine if the domain is enabled.
         (context as Activity).runOnUiThread {
             compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == true)
         }
-        if (compFut.get()) {
-            val completableFuture = CompletableFuture<String>()
-            CompletableFuture.runAsync {
-                println("getTransactionReceipt: waiting for tx receipt")
-                val txObj = tryToGetTxReceipt(txHash)
-                if (txObj != null) {
-                    val jsonObject = JSONObject()
-                    jsonObject.put("blockHash", txObj.blockHash)
-                    jsonObject.put("contractAddress", if (txObj.contractAddress == null) null else txObj.contractAddress)
-                    jsonObject.put("from", txObj.from)
-                    jsonObject.put("logsBloom", txObj.logsBloom)
-                    jsonObject.put("to", if(txObj.to == null) null else txObj.to)
-                    jsonObject.put("transactionHash", txObj.transactionHash)
-                    jsonObject.put("blockNumber", txObj.blockNumber)
-                    jsonObject.put("cumulativeGasUsed", txObj.cumulativeGasUsed)
-                    jsonObject.put("gasUsed", txObj.gasUsed)
-                    jsonObject.put("status", txObj.status)
-                    jsonObject.put("transactionIndex", txObj.transactionIndex)
-                    val logsJsonArray = JSONArray()
-                    for (log in txObj.logs) {
-                        val logJsonObject = JSONObject()
-                        logJsonObject.put("address", log.address)
-                        logJsonObject.put("blockHash", log.blockHash)
-                        logJsonObject.put("blockNumber", if (log.blockNumberRaw == null) null else log.blockNumber)
-                        logJsonObject.put("data", log.data)
-                        logJsonObject.put("logIndex", if (log.logIndexRaw == null) null else log.logIndex)
-                        logJsonObject.put("removed", log.isRemoved)
-                        val topicsJsonArray = JSONArray()
-                        for (topic in log.topics) {
-                            topicsJsonArray.put(topic)
+
+        try {
+            // Only proceed if domain is enabled.
+            if (compFut.get()) {
+                val transactionReceipt = CompletableFuture<String>()
+
+                // Fetch transaction receipt on a background thread.
+                CompletableFuture.runAsync {
+                    try {
+                        val txObj = tryToGetTxReceipt(txHash)
+                        val jsonObject = JSONObject().apply {
+                            if (txObj != null) {
+                                put("blockHash", txObj.blockHash)
+                                put("contractAddress", txObj.contractAddress)
+                                put("from", txObj.from)
+                                put("logsBloom", txObj.logsBloom)
+                                put("to", txObj.to)
+                                put("transactionHash", txObj.transactionHash)
+                                put("blockNumber", txObj.blockNumber)
+                                put("cumulativeGasUsed", txObj.cumulativeGasUsed)
+                                put("gasUsed", txObj.gasUsed)
+                                put("status", txObj.status)
+                                put("transactionIndex", txObj.transactionIndex)
+                                put("logs", JSONArray(txObj.logs.map { log ->
+                                    JSONObject().apply {
+                                        put("address", log.address)
+                                        put("blockHash", log.blockHash)
+                                        put("blockNumber", log.blockNumberRaw)
+                                        put("data", log.data)
+                                        put("logIndex", log.logIndexRaw)
+                                        put("removed", log.isRemoved)
+                                        put("topics", JSONArray(log.topics))
+                                        put("transactionHash", log.transactionHash)
+                                        put("transactionIndex", log.transactionIndexRaw)
+                                    }
+                                }))
+                            } else {
+                                put("error", "Transaction receipt not found")
+                            }
                         }
-                        logJsonObject.put("topics", topicsJsonArray)
-                        logJsonObject.put("transactionHash", log.transactionHash)
-                        logJsonObject.put("transactionIndex", if (log.transactionIndexRaw == null) null else log.transactionIndex)
-                        logsJsonArray.put(logJsonObject)
+                        transactionReceipt.complete(jsonObject.toString())
+                    } catch (e: Exception) {
+                        transactionReceipt.completeExceptionally(e)
                     }
-                    jsonObject.put("logs", logsJsonArray)
-                    completableFuture.complete(jsonObject.toString())
-                } else {
-                    completableFuture.complete("{}")
                 }
+                return transactionReceipt.get()
             }
-            return completableFuture.get()
-        } else {
-            return "{}"
+        } catch (e: Exception) {
+            // Log the exception, and consider handling it appropriately.
+            e.printStackTrace()
         }
+
+        // Return an error JSON if the domain is not enabled or in case of any exception.
+        return JSONObject().put("error", "Domain is not enabled or an error occurred").toString()
     }
+
 
     @JavascriptInterface
     fun signTransaction(
@@ -356,7 +389,7 @@ class AndroidEthereum(
                 to = txData.getString("to"),
                 value =  hexToBigInteger(if (txData.has("value")) txData.getString("value") else "0x0"),
                 data = if (txData.has("data")) txData.getString("data") else "",
-                gasAmount = hexToBigInteger(txData.getString("gas")),
+                gasAmount = if (txData.has("gas")) hexToBigInteger(txData.getString("gas")) else estimateGas(transaction),
                 gasPrice = if (txData.has("gasPrice")) hexToBigInteger(txData.getString("gasPrice")) else null,
                 chainId = Integer.parseInt(chainId)
             ).get()
@@ -391,7 +424,7 @@ class AndroidEthereum(
         }
 
         val mBuilder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.browser_icon)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("Transaction published")
             .setContentText("Transaction published: $txHash")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -414,7 +447,7 @@ class AndroidEthereum(
         }
 
         val mBuilder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.browser_icon)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("Transaction included in block")
             .setContentText("Transaction included in block: $txHash")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -454,8 +487,7 @@ class AndroidEthereum(
 
     @JavascriptInterface
     fun signTypedData(
-        typedData: String,
-        method: String
+        typedData: String
     ): String {
         println("signTypedData: $typedData")
         val compFut = CompletableFuture<Boolean>()
@@ -465,11 +497,12 @@ class AndroidEthereum(
         if (compFut.get()) {
             return "0"
         }
-        return walletSDK.signMessage(typedData, "eth_signTypedData").get()
+        val realTypedData = typedData.replace("\\", "")
+        return walletSDK.signMessage(realTypedData.substring(1, realTypedData.length - 1), "eth_signTypedData").get()
     }
 
     @JavascriptInterface
-    fun getBlocknumber(): String {
+    fun getBlockNumber(): String {
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
             compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)

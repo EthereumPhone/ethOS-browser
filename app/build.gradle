@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 33
+    compileSdk 34
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -44,7 +44,7 @@ dependencies {
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
 
-    implementation 'androidx.webkit:webkit:1.7.0'
+    implementation 'androidx.webkit:webkit:1.8.0'
 
     // Web3j
     implementation 'org.web3j:core:4.8.8-android'

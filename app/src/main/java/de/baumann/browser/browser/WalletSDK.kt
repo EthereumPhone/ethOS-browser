@@ -86,8 +86,9 @@ class WalletSDK(
                 if (gasPrice == null) {
                     gasPriceVAL = web3j?.ethGasPrice()?.sendAsync()?.get()?.gasPrice.toString()
                     // Add 2% to gas price
-                    gasPriceVAL = gasPriceVAL?.let { BigInteger(it).multiply(BigInteger("102")).divide(BigInteger("100")).toString() }
                 }
+
+                gasPriceVAL = gasPriceVAL?.let { BigInteger(it).multiply(BigInteger("102")).divide(BigInteger("100")).toString() }
 
 
                 val reqID = sendTransaction.invoke(
