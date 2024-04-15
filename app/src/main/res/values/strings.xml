@@ -251,8 +251,11 @@
     <string name="menu_restart">Restart and reload tabs</string>
     <string name="setting_title_screenOn">Keep screen on</string>
     <string name="setting_title_audioBackground">Play audio on background</string>
+    <string name="change_network">Change Network</string>
 
 
     <!-- License changelog -->
+
+
 
 </resources>

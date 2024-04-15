@@ -34,7 +34,7 @@
             android:layout_marginBottom="24dp"
             android:fontFamily="@font/inter_regular_font"
             android:text="Do you want to connect your wallet to website.com?"
-            android:textColor="@color/ethOS_gray"
+            android:textColor="@color/ethOS_white"
             android:textSize="20sp"
             app:layout_constraintBottom_toTopOf="@+id/acceptbtn"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
@@ -45,28 +45,29 @@
             android:id="@+id/acceptbtn"
             android:layout_width="0dp"
             android:layout_height="50dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="32dp"
             android:background="@drawable/rounded_corners_primary"
-            android:text="Accept"
-            android:textColor="#FF24303D"
             android:fontFamily="@font/inter_semibold_font"
+            android:text="@string/change_network"
+            android:textColor="@color/ethOS_primary_button_text"
             app:backgroundTint="@null"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/guideline3"
+            app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintStart_toStartOf="@+id/guideline" />
 
-        <Button
+        <ImageButton
             android:id="@+id/declinebtn"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="30dp"
+            android:src = "@drawable/round_close_24"
             android:background="@drawable/rounded_corners_secondary"
-            android:text="Decline"
+            android:fontFamily="@font/inter_semibold_font"
+            android:text=""
             android:textColor="@color/ethOS_white"
             app:backgroundTint="@null"
-            android:fontFamily="@font/inter_semibold_font"
-            app:layout_constraintBaseline_toBaselineOf="@+id/acceptbtn"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
-            app:layout_constraintStart_toStartOf="@+id/guideline4" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
