@@ -33,8 +33,13 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.ethereumphone.walletsdk.WalletSDK;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.http.HttpService;
+
 import java.io.ByteArrayInputStream;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -47,6 +52,10 @@ import de.baumann.browser.unit.BrowserUnit;
 import de.baumann.browser.unit.HelperUnit;
 import de.baumann.browser.unit.RecordUnit;
 import de.baumann.browser.view.NinjaWebView;
+import kotlin.Result;
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.CoroutineContext;
+import kotlin.coroutines.EmptyCoroutineContext;
 
 public class NinjaWebViewClient extends WebViewClient {
 
@@ -57,15 +66,20 @@ public class NinjaWebViewClient extends WebViewClient {
 
     private final WalletSDK walletSDK;
 
+    private final AndroidEthereum mAndroidEthereum;
 
-    public NinjaWebViewClient(NinjaWebView ninjaWebView) {
+
+    public NinjaWebViewClient(NinjaWebView ninjaWebView, AndroidEthereum androidEthereum) {
         super();
         this.ninjaWebView = ninjaWebView;
         this.context = ninjaWebView.getContext();
         this.sp = PreferenceManager.getDefaultSharedPreferences(context);
         this.adBlock = new AdBlock(this.context);
+        mAndroidEthereum = androidEthereum;
 
-        walletSDK = new WalletSDK(context, "https://cloudflare-eth.com");
+        walletSDK = new WalletSDK(context,
+                Web3j.build(new HttpService("https://cloudflare-eth.com"))
+                );
 
 
     }
@@ -364,6 +378,8 @@ public class NinjaWebViewClient extends WebViewClient {
             //The source code has been published originally under Mozilla Public License V2.0. You can obtain a copy of the license at https://mozilla.org/MPL/2.0/
             //The author has given explicit written permission to use his code under GPL V3 in this project.
 
+
+
             view.evaluateJavascript("\n" +
                     "  var rand = {\n" +
                     "    \"noise\": function () {\n" +
@@ -436,6 +452,13 @@ public class NinjaWebViewClient extends WebViewClient {
                 "        isMetaMask: true, // Assuming you want to mimic MetaMask functionality\n" +
                 "        selectedAddress: null,\n" +
                 "        chainId: 'CURRENT_CHAIN_ID', // Replace with the actual chain ID in hexadecimal format\n" +
+                "        _chainChangedListeners: [],\n" +
+                "        _triggerConnectEvent: function() {\n" +
+                "            if (typeof this.onConnect === 'function') {\n" +
+                "                this.onConnect({ chainId: this.chainId });\n" +
+                "            }\n" +
+                "            this.enable();\n" +
+                "        },        \n" +
                 "        enable: async function() {\n" +
                 "            console.log(\"ENABLE\")\n" +
                 "            if (this.selectedAddress) {\n" +
@@ -451,7 +474,7 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                console.log(\"ERROR: \" + error)\n" +
                 "            }\n" +
                 "        },\n" +
-                "        isConnectedVar: false,\n" +
+                "        isConnectedVar: REPLACE_IS_CONNECTED_VAR,\n" +
                 "        isConnected: function() {\n" +
                 "            return this.isConnectedVar;\n" +
                 "        },\n" +
@@ -464,15 +487,24 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                    if (!request.params || !request.params[0].chainId) {\n" +
                 "                        throw new Error('Invalid input parameters');\n" +
                 "                    }\n" +
-                "                    this.chainId = request.params[0].chainId;\n" +
-                "                    return await window.AndroidEthereum.switchChain(this.chainId);\n" +
+                "                    try {\n" +
+                "                        const result = await window.AndroidEthereum.switchChain(request.params[0].chainId);\n" +
+                "                        this.chainId = result; // Update the chainId only after successful switch\n" +
+                "                        return null;\n" +
+                "                    } catch (error) {\n" +
+                "                        throw new Error(`Failed to switch chain: ${error.message}`);\n" +
+                "                    }\n" +
                 "                case 'eth_accounts':\n" +
                 "                    return [this.selectedAddress];\n" +
                 "                case 'eth_sendTransaction':\n" +
                 "                    if (!request.params || !request.params[0]) {\n" +
                 "                        throw new Error('Invalid input parameters');\n" +
                 "                    }\n" +
-                "                    return await window.AndroidEthereum.signTransaction(JSON.stringify(request.params[0]));\n" +
+                "                    const result = await window.AndroidEthereum.signTransaction(JSON.stringify(request.params[0]));\n" +
+                "                    if (result === \"decline\") {\n" +
+                "                        throw new Error('User declined the transaction');\n" +
+                "                    }\n" +
+                "                    return result;\n" +
                 "                case 'eth_sign':\n" +
                 "                    return window.AndroidEthereum.signMessage(request.params[1], 'eth_sign');\n" +
                 "                case 'personal_sign':\n" +
@@ -511,17 +543,63 @@ public class NinjaWebViewClient extends WebViewClient {
                 "                    }\n" +
                 "                    this.chainId = request.params[0].chainId;\n" +
                 "                    return await window.AndroidEthereum.addChain(JSON.stringify(request.params[0]));\n" +
+                "                case 'wallet_requestPermissions':\n" +
+                "                    if (!request.params || !request.params[0]) {\n" +
+                "                        throw new Error('Invalid input parameters');\n" +
+                "                    }\n" +
+                "                    \n" +
+                "                    // Assuming that the primary permission being requested is to access accounts.\n" +
+                "                    // You can expand this to handle other permissions as per your application's requirements.\n" +
+                "                    const permissions = request.params[0];\n" +
+                "                    if (permissions && permissions.eth_accounts) {\n" +
+                "                        // Here, you'd typically check if the user has already granted this permission.\n" +
+                "                        // For simplicity, assuming the user grants permission:\n" +
+                "                        await this.enable(); // Replace with your method to get accounts\n" +
+                "                        return [{ invoker: window.location.hostname, data: { eth_accounts: {} } }];\n" +
+                "                    } else {\n" +
+                "                        // Handle other permissions or throw an error for unsupported permissions\n" +
+                "                        throw new Error('Unsupported permission requested');\n" +
+                "                    }\n" +
+                "                case 'eth_getTransactionCount':\n" +
+                "                    if (!request.params || !request.params[0]) {\n" +
+                "                        throw new Error('Invalid input parameters');\n" +
+                "                    }\n" +
+                "                    try {\n" +
+                "                        // Assuming `getTransactionCount` is a method in your Kotlin backend\n" +
+                "                        // that returns the transaction count for the given address\n" +
+                "                        var txCount = await window.AndroidEthereum.getTransactionCount(request.params[0]);\n" +
+                "                        return txCount; // Make sure txCount is formatted as a hexadecimal string\n" +
+                "                    } catch (error) {\n" +
+                "                        throw new Error(`Failed to get transaction count: ${error.message}`);\n" +
+                "                    }\n" +
+                "                case 'eth_getBalance':\n" +
+                "                    if (!request.params || !request.params[0]) {\n" +
+                "                        throw new Error('Invalid input parameters');\n" +
+                "                    }\n" +
+                "                    try {\n" +
+                "                        var balance = await window.AndroidEthereum.getBalance(request.params[0]);\n" +
+                "                        return balance; // Balance is expected to be returned as a hexadecimal string\n" +
+                "                    } catch (error) {\n" +
+                "                        throw new Error(`Failed to get balance: ${error.message}`);\n" +
+                "                    }\n" +
+                "                    \n" +
                 "                default:\n" +
                 "                    throw new Error(`Unsupported method: ${request.method}`);\n" +
                 "            }\n" +
                 "        },\n" +
-                "        on: function(event, callback) {\n" +
+                "        on: function(event, listener) {\n" +
                 "            console.log(\"Subscribed to event:\", event);\n" +
                 "            // You should implement a mechanism in your Android code to trigger these callbacks\n" +
                 "            // when the relevant events occur. This could be done by invoking JavaScript from\n" +
                 "            // Android when the event happens.\n" +
                 "            // ...\n" +
-                "        }\n" +
+                "            if (event === 'chainChanged') {\n" +
+                "                this._chainChangedListeners.push(listener);\n" +
+                "            }\n" +
+                "        },\n" +
+                "        _triggerChainChanged: function(chainId) {\n" +
+                "            this._chainChangedListeners.forEach(listener => listener(chainId));\n" +
+                "        },\n" +
                 "    };\n" +
                 "\n" +
                 "    // Trigger the 'connect' event if already connected\n" +
@@ -530,11 +608,63 @@ public class NinjaWebViewClient extends WebViewClient {
                 "            console.log('Ethereum provider connected with chainId:', info.chainId);\n" +
                 "        });\n" +
                 "    }\n" +
-                "}\n";
-        String currChainId = toHexString(walletSDK.getChainId());
+                "}\n" +
+                "\n" +
+                "if (window.ethereum.isConnected()) {\n" +
+                "    window.ethereum._triggerConnectEvent(); // Add this function in the ethereum object\n" +
+                "}\n" +
+                "\n" +
+                "(function() {\n" +
+                "    const originalRequest = ethereum.request;\n" +
+                "\n" +
+                "    ethereum.request = async function(request) {\n" +
+                "        console.log('MetaMask Request:', request);\n" +
+                "        try {\n" +
+                "            const response = await originalRequest.apply(ethereum, [request]);\n" +
+                "            console.log('MetaMask Response:', response);\n" +
+                "            console.log('Current chainID: ', window.ethereum.chainId)\n" +
+                "            return response;\n" +
+                "        } catch (error) {\n" +
+                "            console.error('MetaMask Error:', error);\n" +
+                "            throw error; // Re-throw the error so that the original behavior is preserved\n" +
+                "        }\n" +
+                "    };\n" +
+                "\n" +
+                "    console.log('MetaMask request logging is enabled.');\n" +
+                "})();\n";
+        CompletableFuture<Integer> completableFuture = new CompletableFuture<>();
+        Continuation<Integer> continuation = new Continuation<Integer>() {
+
+            @NonNull
+            @Override
+            public CoroutineContext getContext() {
+                return EmptyCoroutineContext.INSTANCE;
+            }
+
+            @Override
+            public void resumeWith(@NonNull Object o) {
+                if (o instanceof Result.Failure)
+                    completableFuture.completeExceptionally((((Result.Failure) o).exception));
+                else
+                    completableFuture.complete((Integer) o);
+            }
+        };
+
+        walletSDK.getChainId(continuation);
+
+        String currChainId = null;
+        try {
+            currChainId = toHexString(completableFuture.get());
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         systemWalletJs = systemWalletJs.replace("CURRENT_CHAIN_ID", currChainId);
         MyHashMapManager hashMapManager = new MyHashMapManager(context);
-        boolean isConnected = Boolean.TRUE.equals(hashMapManager.getHashMap().get(getDomainName(ninjaWebView.getUrl())));
+        boolean isConnected = false;
+        try {
+            isConnected = hashMapManager.getHashMap().get(getDomainName(ninjaWebView.getUrl()));
+        } catch (NullPointerException ignored) {}
+
         if (isConnected) {
             systemWalletJs = systemWalletJs.replace("REPLACE_IS_CONNECTED_VAR", "true");
         } else {
@@ -607,6 +737,10 @@ public class NinjaWebViewClient extends WebViewClient {
                 this.ninjaWebView.initPreferences(urlToLoad);
                 ninjaWebView.loadUrl(urlToLoad);
                 return false;
+
+            } else if (url.startsWith("wc:")) {
+                mAndroidEthereum.connectToWalletConnect(url);
+                return true;
             } else {
                 try {
                     Intent intent;

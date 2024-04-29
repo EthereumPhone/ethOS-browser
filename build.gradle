@@ -5,6 +5,8 @@ buildscript {
         ext.supportLibVersion = "25.3.0"
         google()
         mavenCentral()
+        maven { url "https://jitpack.io" }
+        jcenter() // Warning: this repository is going to shut down soon
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.3.1'
@@ -17,5 +19,6 @@ allprojects {
         mavenCentral()
         google()
         maven { url 'https://jitpack.io' }
+        jcenter() // Warning: this repository is going to shut down soon
     }
 }

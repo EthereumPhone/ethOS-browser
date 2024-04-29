@@ -1,6 +1,7 @@
 package de.baumann.browser.browser
 
 import android.app.Activity
+import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -9,18 +10,33 @@ import android.net.Uri
 import android.os.Build
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.TextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.NotificationCompat
+import androidx.preference.PreferenceManager
+import com.walletconnect.android.Core
+import com.walletconnect.android.CoreClient
+import com.walletconnect.android.relay.ConnectionType
+import com.walletconnect.web3.wallet.client.Wallet
+import com.walletconnect.web3.wallet.client.Web3Wallet
 import de.baumann.browser.R
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.ethereumphone.walletsdk.WalletSDK
 import org.json.JSONArray
 import org.json.JSONObject
+import org.koin.core.context.GlobalContext
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
+import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.protocol.core.methods.response.Transaction
 import org.web3j.protocol.core.methods.response.TransactionReceipt
@@ -45,8 +61,10 @@ class AndroidEthereum(
 
     var walletSDK = WalletSDK(
         context = context,
-        web3RPC = chainRPC
+        web3jInstance = Web3j.build(HttpService(chainRPC))
     )
+
+    private var connections: List<String> = arrayListOf()
 
     private val atomicBoolean = AtomicBoolean(true)
 
@@ -55,34 +73,215 @@ class AndroidEthereum(
 
     var web3j = Web3j.build(HttpService(chainRPC))
 
+    val projectId = "fd790311be10b88652a7c5a326bcfedb" // Get Project ID at https://cloud.walletconnect.com/
+    val relayUrl = "relay.walletconnect.com"
+    val serverUrl = "wss://$relayUrl?projectId=$projectId"
+    val connectionType = ConnectionType.AUTOMATIC
+    val appMetaData = Core.Model.AppMetaData(
+        name = "ethOS Wallet",
+        description = "",
+        url = "",
+        icons = arrayListOf(""),
+        redirect = "" // Custom Redirect URI
+    )
+    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+
+
     init {
         println("CLOSED: NEW ANDROID ETHEREUM")
-        chainId = walletSDK.getChainId().toString()
-        initialSetBasedOnChainId()
-        CompletableFuture.runAsync {
-            Thread.sleep(10000)
-            while (atomicBoolean.get()) {
-                (context as Activity).runOnUiThread {
-                    if (webView.contentHeight == 0) {
-                        atomicBoolean.set(false)
-                    }
-                }
-                val newestChainIdNotHex = walletSDK.getChainId()
+        chainId = "0x1"
+        GlobalScope.launch(Dispatchers.IO) {
+            chainId = walletSDK.getChainId().toString()
+            val rpcUrl = getCorrectRPC(walletSDK.getChainId())
+            walletSDK = WalletSDK(
+                context = context,
+                web3jInstance = Web3j.build(HttpService(rpcUrl))
+            )
+            updateWeb3jInstance(rpcUrl)
+            GlobalScope.launch(Dispatchers.IO) {
+                while (atomicBoolean.get()) {
+                    val newestChainIdNotHex = walletSDK.getChainId()
 
-                (context as Activity).runOnUiThread {
-                    if (newestChainIdNotHex != Integer.parseInt(chainId)) {
-                        chainId = newestChainIdNotHex.toString()
-                        initialSetBasedOnChainId()
-                        webView.evaluateJavascript("window.ethereum.chainId=\"${toHexString(newestChainIdNotHex)}\"", null);
-                        webView.evaluateJavascript("if (window.ethereum.savedChainChangedCallback != null) {\n" +
-                                "    console.log('CHANGING CHAIN'); window.ethereum.savedChainChangedCallback(\"${toHexString(newestChainIdNotHex)}\")\n" +
-                                "}", null)
+                    (context as Activity).runOnUiThread {
+                        if (newestChainIdNotHex != Integer.parseInt(chainId)) {
+                            println("ethosdebug: CHAIN WAS CHANGED TO $newestChainIdNotHex")
+                            chainId = newestChainIdNotHex.toString()
+                            web3j = Web3j.build(HttpService(getCorrectRPC(newestChainIdNotHex)))
+                            walletSDK = WalletSDK(
+                                context = context,
+                                web3jInstance = web3j
+                            )
+                            webView.evaluateJavascript("window.ethereum.chainId=\"${toHexString(newestChainIdNotHex)}\"", null);
+                            webView.evaluateJavascript("if (window.ethereum.savedChainChangedCallback != null) {\n" +
+                                    "    console.log('CHANGING CHAIN'); window.ethereum.savedChainChangedCallback(\"${toHexString(newestChainIdNotHex)}\")\n" +
+                                    "}", null)
+
+                            webView.post {
+                                webView.evaluateJavascript("javascript:window.ethereum._triggerChainChanged('${bigIntegerToHex(BigInteger(newestChainIdNotHex.toString()))}')", null)
+                            }
+
+                            sharedPreferences.getString(getDomainName(webView.url!!)+"_topic", null)?.let {
+                                Web3Wallet.emitSessionEvent(
+                                    params = Wallet.Params.SessionEmit(
+                                        topic = it,
+                                        event = Wallet.Model.SessionEvent(
+                                            name = "chainChanged",
+                                            data = "eip155:$newestChainIdNotHex"
+                                        ),
+                                        chainId = newestChainIdNotHex.toString()
+                                    ),
+                                    onError = {
+                                        println("Error: $it")
+                                    }
+                                )
+                            }
+                        }
                     }
+                    Thread.sleep(1000)
                 }
-                Thread.sleep(1000)
             }
         }
 
+
+
+
+
+        CoreClient.initialize(relayServerUrl = serverUrl, connectionType = connectionType, application = context.applicationContext as Application, metaData = appMetaData, onError = {})
+
+        val initParams = Wallet.Params.Init(core = CoreClient)
+
+        Web3Wallet.initialize(initParams) { error ->
+            // Error will be thrown if there's an issue during initialization
+        }
+
+        val walletDelegate = object : Web3Wallet.WalletDelegate {
+            override fun onSessionProposal(sessionProposal: Wallet.Model.SessionProposal) {
+                // Triggered when wallet receives the session proposal sent by a Dapp
+                val proposerPublicKey: String = sessionProposal.proposerPublicKey
+                val supportedNamespaces = mapOf(
+                    "eip155" to Wallet.Model.Namespace.Session(
+                        chains = listOf("eip155:1", "eip155:7777777"),
+                        methods = listOf("personal_sign", "eth_sendTransaction", "eth_signTransaction", "wallet_addEthereumChain"),
+                        events = listOf("chainChanged", "accountsChanged"),
+                        accounts = listOf("eip155:1:"+walletSDK.getAddress(), "eip155:7777777:"+walletSDK.getAddress())
+                    )
+                )
+
+                val approveParams: Wallet.Params.SessionApprove = Wallet.Params.SessionApprove(proposerPublicKey, supportedNamespaces)
+                Web3Wallet.approveSession(approveParams) { error ->
+                    println("Error: $error")
+                }
+                (context as Activity).runOnUiThread {
+                    isEnabled.updateHashMap(getDomainName(webView.url!!), true)
+                    sharedPreferences.edit().putString(getDomainName(webView.url!!)+"_topic", sessionProposal.pairingTopic).apply()
+                }
+            }
+
+            override fun onSessionRequest(sessionRequest: Wallet.Model.SessionRequest) {
+                // Triggered when a Dapp sends SessionRequest to sign a transaction or a message
+                val sessionTopic: String = sessionRequest.topic
+                (context as Activity).runOnUiThread {
+                    sharedPreferences.edit().putString(getDomainName(webView.url!!)+"_topic", sessionTopic).apply()
+                }
+                val params = sessionRequest.request.params
+                val method = sessionRequest.request.method
+                when(method) {
+                    "personal_sign" ->  {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            val jsonRpcResponse: Wallet.Model.JsonRpcResponse.JsonRpcResult = Wallet.Model.JsonRpcResponse.JsonRpcResult(
+                                id = sessionRequest.request.id,
+                                result = signMessage(extractFirstValueWithoutQuotes(params)!!, method)
+                            )
+                            val result = Wallet.Params.SessionRequestResponse(sessionTopic = sessionTopic, jsonRpcResponse = jsonRpcResponse)
+
+                            Web3Wallet.respondSessionRequest(result) { error ->
+                                println("Error: $error")
+                            }
+                        }
+                    }
+                    "wallet_addEthereumChain" -> {
+                        val jsonRpcResponse: Wallet.Model.JsonRpcResponse.JsonRpcResult = Wallet.Model.JsonRpcResponse.JsonRpcResult(
+                            id = sessionRequest.request.id,
+                            result = addChain(params.substring(1, params.length-1))
+                        )
+                        val result = Wallet.Params.SessionRequestResponse(sessionTopic = sessionTopic, jsonRpcResponse = jsonRpcResponse)
+
+                        Web3Wallet.respondSessionRequest(result) { error ->
+                            println("Error: $error")
+                        }
+                    }
+                    "eth_sendTransaction" -> {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            val jsonRpcResponse: Wallet.Model.JsonRpcResponse.JsonRpcResult = Wallet.Model.JsonRpcResponse.JsonRpcResult(
+                                id = sessionRequest.request.id,
+                                result = signTransaction(params.substring(1, params.length-1))
+                            )
+                            val result = Wallet.Params.SessionRequestResponse(sessionTopic = sessionTopic, jsonRpcResponse = jsonRpcResponse)
+
+                            Web3Wallet.respondSessionRequest(result) { error ->
+                                println("Error: $error")
+                            }
+                        }
+                    }
+                }
+
+
+            }
+
+            override fun onAuthRequest(authRequest: Wallet.Model.AuthRequest) {
+                // Triggered when Dapp / Requester makes an authorization request
+            }
+
+            override fun onSessionDelete(sessionDelete: Wallet.Model.SessionDelete) {
+                // Triggered when the session is deleted by the peer
+            }
+
+            override fun onSessionSettleResponse(settleSessionResponse: Wallet.Model.SettledSessionResponse) {
+                // Triggered when wallet receives the session settlement response from Dapp
+            }
+
+            override fun onSessionUpdateResponse(sessionUpdateResponse: Wallet.Model.SessionUpdateResponse) {
+                // Triggered when wallet receives the session update response from Dapp
+            }
+
+            override fun onConnectionStateChange(state: Wallet.Model.ConnectionState) {
+                //Triggered whenever the connection state is changed
+
+            }
+
+            override fun onError(error: Wallet.Model.Error) {
+                // Triggered whenever there is an issue inside the SDK
+                println("Error: $error")
+            }
+        }
+        Web3Wallet.setWalletDelegate(walletDelegate)
+
+
+    }
+
+    fun updateWeb3jInstance(rpcUrl: String) {
+        web3j = Web3j.build(HttpService(rpcUrl))
+    }
+
+    fun extractFirstValueWithoutQuotes(arrayString: String): String? {
+        // Remove the leading and trailing brackets and split the string by commas
+        val elements = arrayString.removeSurrounding("[", "]").split(",\\s*".toRegex())
+
+        // Return the first element of the array without quotes and whitespace
+        return elements.firstOrNull()?.trim()?.removeSurrounding("\"")
+    }
+
+    fun connectToWalletConnect(uri: String) {
+        Web3Wallet.pair(
+            Wallet.Params.Pair(uri),
+            onSuccess = {
+                println("SUCCESS")
+            },
+            onError = {
+                println("ON ERROR: $it")
+            }
+        )
     }
 
     private fun toHexString(i: Int): String {
@@ -93,53 +292,27 @@ class AndroidEthereum(
         atomicBoolean.set(false)
     }
 
-    fun initialSetBasedOnChainId() {
-        when(Integer.parseInt(chainId)) {
-            1 -> {
-                web3j = if (isLocalLightClientRunning()) {
-                    Web3j.build(HttpService())
-                } else {
-                    Web3j.build(HttpService("https://eth-mainnet.g.alchemy.com/v2/AH4YE6gtBXoZf2Um-Z8Xr-6noHSZocKq"))
-                }
-                walletSDK = WalletSDK(
-                    context = context,
-                    web3RPC = "https://eth-mainnet.g.alchemy.com/v2/AH4YE6gtBXoZf2Um-Z8Xr-6noHSZocKq"
-                )
-            }
-            10 -> {
-                web3j = Web3j.build(HttpService("https://opt-mainnet.g.alchemy.com/v2/4CrNAPvukjJfB5UJYGLgqT_Q2HSkrnTP"))
-                walletSDK = WalletSDK(
-                    context = context,
-                    web3RPC = "https://opt-mainnet.g.alchemy.com/v2/4CrNAPvukjJfB5UJYGLgqT_Q2HSkrnTP"
-                )
-            }
-            42161 -> {
-                web3j = Web3j.build(HttpService("https://arb-mainnet.g.alchemy.com/v2/nUK-9SVXiX2HYmdU-Pto7iPcPEm--euD"))
-                walletSDK = WalletSDK(
-                    context = context,
-                    web3RPC = "https://arb-mainnet.g.alchemy.com/v2/nUK-9SVXiX2HYmdU-Pto7iPcPEm--euD"
-                )
-            }
-            5 -> {
-                web3j = Web3j.build(HttpService("https://eth-goerli.g.alchemy.com/v2/wEno3MttLG5usiVg4xL5_dXrDy_QH95f"))
-                walletSDK = WalletSDK(
-                    context = context,
-                    web3RPC = "https://eth-goerli.g.alchemy.com/v2/wEno3MttLG5usiVg4xL5_dXrDy_QH95f"
-                )
-            }
-            7777777 -> {
-                web3j = Web3j.build(HttpService("https://rpc.zora.energy"))
-                walletSDK = WalletSDK(
-                    context = context,
-                    web3RPC = "https://rpc.zora.energy"
-                )
-            }
+
+    fun getCorrectRPC(chainId: Int): String {
+        return when(chainId) {
+            1 -> "https://eth-mainnet.g.alchemy.com/v2/AH4YE6gtBXoZf2Um-Z8Xr-6noHSZocKq"
+            10 -> "https://opt-mainnet.g.alchemy.com/v2/4CrNAPvukjJfB5UJYGLgqT_Q2HSkrnTP"
+            42161 -> "https://arb-mainnet.g.alchemy.com/v2/nUK-9SVXiX2HYmdU-Pto7iPcPEm--euD"
+            5 -> "https://eth-goerli.g.alchemy.com/v2/wEno3MttLG5usiVg4xL5_dXrDy_QH95f"
+            7777777 -> "https://rpc.zora.energy"
+            137 -> "https://polygon-mainnet.g.alchemy.com/v2/OcU1X_dJ0EPxn2DzICOkL3JcaNuvZzbT"
+            8453 -> "https://base-mainnet.g.alchemy.com/v2/ARPkWAyUzQM4JoU8OsAeVgNP18_yfIA-"
+            else -> "https://eth-mainnet.g.alchemy.com/v2/AH4YE6gtBXoZf2Um-Z8Xr-6noHSZocKq"
         }
     }
 
     @JavascriptInterface
     fun getNewestChainId(): String {
-        return toHexString(walletSDK.getChainId())
+        val future = CompletableFuture<String>()
+        GlobalScope.launch {
+            future.complete(toHexString(walletSDK.getChainId()))
+        }
+        return future.get()
     }
 
     @JavascriptInterface
@@ -154,6 +327,54 @@ class AndroidEthereum(
         }
         return completableFuture.get()
     }
+
+    @JavascriptInterface
+    fun getBalance(address: String): String {
+        val completableFuture = CompletableFuture<String>()
+        (context as Activity).runOnUiThread {
+            if (isEnabled.getHashMap()[getDomainName(webView.url!!)] == true) {
+                try {
+                    // Fetching the balance for the specified address
+                    val balance = web3j.ethGetBalance(
+                        address, DefaultBlockParameterName.LATEST
+                    ).sendAsync().get().balance
+
+                    // Completing the future with the balance (in hexadecimal format)
+                    completableFuture.complete(balance.toString(16))
+                } catch (e: Exception) {
+                    completableFuture.completeExceptionally(e)
+                }
+            } else {
+                completableFuture.complete("")
+            }
+        }
+        return completableFuture.get()
+    }
+
+
+    @JavascriptInterface
+    fun getTransactionCount(address: String): String {
+        val completableFuture = CompletableFuture<String>()
+        (context as Activity).runOnUiThread {
+            if (isEnabled.getHashMap()[getDomainName(webView.url!!)] == true) {
+                try {
+                    // Fetching the transaction count for the specified address
+                    val transactionCount = web3j.ethGetTransactionCount(
+                        address, DefaultBlockParameterName.LATEST
+                    ).sendAsync().get().transactionCount
+
+                    // Completing the future with the transaction count (in hexadecimal format)
+                    completableFuture.complete(transactionCount.toString(16))
+                } catch (e: Exception) {
+                    completableFuture.completeExceptionally(e)
+                }
+            } else {
+                completableFuture.complete("")
+            }
+        }
+        return completableFuture.get()
+    }
+
 
     @JavascriptInterface
     fun getAddress(): String {
@@ -222,16 +443,17 @@ class AndroidEthereum(
             val rpcUrls = chain.getJSONArray("rpcUrls")
             walletSDK = WalletSDK(
                 context = context,
-                web3RPC = rpcUrls.getString(0)
+                web3jInstance = Web3j.build(HttpService(rpcUrls.getString(0)))
             )
             web3j = Web3j.build(HttpService(rpcUrls.getString(0)))
             val newChainId = Integer.parseInt(hexToBigInteger(chainId))
-            val result = walletSDK.changeChainId(newChainId).get()
-            if (result == "done") {
-                this.chainId = hexToBigInteger(chainId)
-                completableFuture.complete(chainId)
-            } else {
-                completableFuture.complete("0x1")
+            GlobalScope.launch {
+                val result = walletSDK.changeChain(
+                    chainId = newChainId,
+                    rpcEndpoint = rpcUrls.getString(0)
+                )
+                updateWeb3jInstance(rpcUrls.getString(0))
+                completableFuture.complete(result)
             }
         }
 
@@ -244,8 +466,14 @@ class AndroidEthereum(
         (context as Activity).runOnUiThread {
             view.addView(mainView, params)
         }
-
-        return completableFuture.get()
+        val endVal = completableFuture.get()
+        if (endVal == "done") {
+            chainId = hexToBigInteger(chainId)
+            completableFuture.complete(chainId)
+        } else {
+            completableFuture.complete("0x1")
+        }
+        return endVal
     }
     @JavascriptInterface
     fun getTransactionByHash(txHash: String): String {
@@ -325,7 +553,7 @@ class AndroidEthereum(
                 val transactionReceipt = CompletableFuture<String>()
 
                 // Fetch transaction receipt on a background thread.
-                CompletableFuture.runAsync {
+                GlobalScope.launch(Dispatchers.IO) {
                     try {
                         val txObj = tryToGetTxReceipt(txHash)
                         val jsonObject = JSONObject().apply {
@@ -379,34 +607,48 @@ class AndroidEthereum(
     fun signTransaction(
         transaction: String
     ): String {
+        println("Launching the signTx method")
+        val future = CompletableFuture<String>();
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
             compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == true)
         }
         if (compFut.get()) {
-            val txData = JSONObject(transaction)
-            val txHash = walletSDK.sendTransaction(
-                to = txData.getString("to"),
-                value =  hexToBigInteger(if (txData.has("value")) txData.getString("value") else "0x0"),
-                data = if (txData.has("data")) txData.getString("data") else "",
-                gasAmount = if (txData.has("gas")) hexToBigInteger(txData.getString("gas")) else estimateGas(transaction),
-                gasPrice = if (txData.has("gasPrice")) hexToBigInteger(txData.getString("gasPrice")) else null,
-                chainId = Integer.parseInt(chainId)
-            ).get()
-            return if (txHash == null) {
-                "Transaction error: insufficient funds for gas * price + value"
-            } else {
+            GlobalScope.launch {
+                val gasPrice = increaseByFivePercent(web3j.ethGasPrice().send().gasPrice)
+
+                val txData = JSONObject(transaction)
+                val txHash = walletSDK.sendTransaction(
+                    to = txData.getString("to"),
+                    value =  hexToBigInteger(if (txData.has("value")) txData.getString("value") else "0x0"),
+                    data = if (txData.has("data")) txData.getString("data") else "",
+                    gasAmount = if (txData.has("gas")) hexToBigInteger(txData.getString("gas")) else estimateGas(transaction),
+                    gasPrice = if (txData.has("gasPrice")) hexToBigInteger(txData.getString("gasPrice")) else gasPrice.toString(),
+                )
                 if (txHash != WalletSDK.DECLINE) {
                     showNotificationForTx(txHash)
-                    walletSDK.waitForTxToBeValidated(txHash).whenComplete { _, _ ->
+                    waitForTxToBeValidated(txHash).whenComplete { _, _ ->
                         showValidatedNotificationForTx(txHash)
                     }
                 }
-                txHash
+                future.complete(txHash)
             }
+            return future.get()
         } else {
             return "0"
         }
+    }
+
+    fun increaseByFivePercent(value: BigInteger): BigInteger {
+        // Create a BigInteger representation of 105
+        val multiplier = BigInteger.valueOf(105)
+
+        // Create a BigInteger representation of 100 for the divisor
+        val divisor = BigInteger.valueOf(100)
+
+        // Increase value by 5%
+        // Equivalent to: value * 105 / 100
+        return value.multiply(multiplier).divide(divisor)
     }
 
     private fun showNotificationForTx(txHash: String) {
@@ -460,6 +702,7 @@ class AndroidEthereum(
         message: String,
         method: String
     ): String {
+        val future = CompletableFuture<String>();
         val compFut = CompletableFuture<Boolean>()
         (context as Activity).runOnUiThread {
             compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)
@@ -467,22 +710,32 @@ class AndroidEthereum(
         if (compFut.get()) {
             return "0"
         }
-        return if (method == "personal_sign") {
-            val response = walletSDK.signMessage(message, "personal_sign_hex").get()
-            println(response)
-            response
-        } else if (method == "eth_sign") {
-            val response =  walletSDK.signMessage(message, "personal_sign").get()
-            println(response)
-            response
-        } else if (method == "eth_signTypedData") {
-            val mess = message.replace("\\", "")
-            val response = walletSDK.signMessage(mess.substring(1, mess.length - 1), "eth_signTypedData").get()
-            println(response)
-            response
-        } else {
-            "0"
+        GlobalScope.launch {
+            val result = when (method) {
+                "personal_sign" -> {
+                    val response = walletSDK.signMessage(message, "personal_sign_hex")
+                    println(response)
+                    response
+                }
+                "eth_sign" -> {
+                    val response =  walletSDK.signMessage(message, "personal_sign")
+                    println(response)
+                    response
+                }
+                "eth_signTypedData" -> {
+                    val mess = message.replace("\\", "")
+                    val response = walletSDK.signMessage(mess.substring(1, mess.length - 1), "eth_signTypedData")
+                    println(response)
+                    response
+                }
+                else -> {
+                    "0"
+                }
+            }
+            future.complete(result)
         }
+
+        return future.get()
     }
 
     @JavascriptInterface
@@ -491,6 +744,7 @@ class AndroidEthereum(
     ): String {
         println("signTypedData: $typedData")
         val compFut = CompletableFuture<Boolean>()
+        val future = CompletableFuture<String>()
         (context as Activity).runOnUiThread {
             compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)
         }
@@ -498,8 +752,35 @@ class AndroidEthereum(
             return "0"
         }
         val realTypedData = typedData.replace("\\", "")
-        return walletSDK.signMessage(realTypedData.substring(1, realTypedData.length - 1), "eth_signTypedData").get()
+        GlobalScope.launch {
+            val resultSign = walletSDK.signMessage(realTypedData.substring(1, realTypedData.length - 1), "eth_signTypedData")
+            future.complete(resultSign)
+        }
+        return future.get()
     }
+
+    fun waitForTxToBeValidated(txHash: String): CompletableFuture<Unit> {
+        val completableFuture = CompletableFuture<Unit>()
+        CompletableFuture.runAsync {
+            while (true) {
+                val receipt = web3j!!.ethGetTransactionReceipt(txHash).sendAsync().get()
+                if (receipt.hasError()) {
+                    println("Error: ${receipt.error.message}")
+                    completableFuture.completeExceptionally(Exception(receipt.error.message))
+                    return@runAsync
+                }
+                if (receipt.result != null) {
+                    println("Transaction validated!")
+                    completableFuture.complete(Unit)
+                    return@runAsync
+                }
+                Thread.sleep(1000)
+            }
+        }
+
+        return completableFuture
+    }
+
 
     @JavascriptInterface
     fun getBlockNumber(): String {
@@ -594,7 +875,12 @@ class AndroidEthereum(
         }
         val blockStr = postEthGetBlockByNumber(blockParamter, detailFlag)
         val block = JSONObject(blockStr)
-        return block.getJSONObject("result").toString()
+
+        return try {
+            block.getJSONObject("result").toString()
+        } catch (e: Exception) {
+            "null"
+        }
     }
 
     fun postEthGetBlockByNumber(blockParamter: String, detailFlag: Boolean): String {
@@ -664,26 +950,38 @@ class AndroidEthereum(
 
     @JavascriptInterface
     fun switchChain(chainId: String): String {
-        val compFut = CompletableFuture<Boolean>()
+        val isEnabledFuture = CompletableFuture<Boolean>()
+        val future = CompletableFuture<String>()
         (context as Activity).runOnUiThread {
-            compFut.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == false)
+            isEnabledFuture.complete(isEnabled.getHashMap()[getDomainName(webView.url!!)] == true)
         }
-        if (compFut.get()) {
-            return "0x1"
+
+        if (!isEnabledFuture.get()) {
+            throw Exception("Domain is not enabled")
         }
+
         val newChainId = Integer.parseInt(hexToBigInteger(chainId))
-        val result = walletSDK.changeChainId(newChainId).get()
+        GlobalScope.launch {
+            val newRPC = getCorrectRPC(newChainId)
+            updateWeb3jInstance(newRPC)
+            future.complete(walletSDK.changeChain(
+                chainId = newChainId,
+                rpcEndpoint = newRPC
+            ))
+        }
+        val result = future.get()
+
         if (result == "done") {
-            (context as Activity).runOnUiThread {
-                webView.evaluateJavascript("window.ethereum.chainId=\"$chainId\"", null)
-            }
             this.chainId = hexToBigInteger(chainId)
-            initialSetBasedOnChainId()
+            webView.post {
+                webView.evaluateJavascript("javascript:window.ethereum._triggerChainChanged('${chainId}')", null)
+            }
             return chainId
         } else {
-            return "0x1"
+            throw Exception("Failed to switch chain")
         }
     }
+
 
     @JavascriptInterface
     fun enableWallet(): String {
@@ -744,6 +1042,11 @@ class AndroidEthereum(
     private fun hexToBigInteger(hex: String): String {
         return BigInteger(hex.substring(2), 16).toString()
     }
+
+    private fun bigIntegerToHex(bigInteger: BigInteger): String {
+        return "0x" + bigInteger.toString(16)
+    }
+
 
     /**
      * Function to turn webview url into domain name

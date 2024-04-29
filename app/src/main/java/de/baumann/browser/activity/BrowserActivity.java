@@ -182,6 +182,7 @@ public class BrowserActivity extends AppCompatActivity implements BrowserControl
     private AlbumController currentAlbumController = null;
     private ValueCallback<Uri[]> mFilePathCallback;
 
+
     public Bitmap favicon () { return ninjaWebView.getFavicon(); }
 
     private AlbumController nextAlbumController(boolean next) {
@@ -418,7 +419,9 @@ public class BrowserActivity extends AppCompatActivity implements BrowserControl
         if (!sp.getBoolean("sp_reloadTabs", false) || sp.getInt("restart_changed", 1) == 1) {
             sp.edit().putString("openTabs", "").apply();   //clear open tabs in preferences
             sp.edit().putString("openTabsProfile", "").apply(); }
-
+        if (sp.contains("walletconnect_uri")) {
+            sp.edit().remove("walletconnect_uri").apply();
+        }
         unregisterReceiver(downloadReceiver);
         super.onDestroy();
     }
@@ -2395,6 +2398,7 @@ public class BrowserActivity extends AppCompatActivity implements BrowserControl
             addAlbum(null, data, true, false, "", null);
             getIntent().setAction("");
             hideOverview();
+
             BrowserUnit.openInBackground(activity, intent, data);
         }
     }

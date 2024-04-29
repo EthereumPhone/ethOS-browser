@@ -125,7 +125,8 @@ public class NinjaWebView extends WebView implements AlbumController {
         this.listStandard = new List_standard(this.context);
         this.listProtected = new List_protected(this.context);
         this.album = new AdapterTabs(this.context, this, browserController);
-        this.webViewClient = new NinjaWebViewClient(this) {
+        androidEthereum = new AndroidEthereum(context, this);
+        this.webViewClient = new NinjaWebViewClient(this, androidEthereum) {
             @Override
             public void onReceivedError(WebView webview, WebResourceRequest request, WebResourceError error) {
                 Context context = webview.getContext();
@@ -145,7 +146,6 @@ public class NinjaWebView extends WebView implements AlbumController {
         initWebView();
         initAlbum();
 
-        androidEthereum = new AndroidEthereum(context, this);
         this.addJavascriptInterface(androidEthereum, "AndroidEthereum");
     }
 
