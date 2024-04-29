@@ -67,12 +67,18 @@
     <color name="teal">#40009688</color>
     <color name="yellow">#40ffc107</color>
 
-    <color name="ethOS_blue">#FF24303D</color>
-    <color name="ethOS_blue2">#FF1E2730</color>
-    <color name="ethOS_white">#FAFBFF</color>
-    <color name="ethOS_bg">#191919</color>
-    <color name="ethOS_darkgrey">#242424</color>
-    <color name="ethOS_gray">#CDCDCD</color>
-    <color name="black">#000000</color>
-    <color name="white">#ffffff</color>
+    <color name="ethOS_black">#FF000000</color>
+    <color name="ethOS_bg">@color/ethOS_black</color>
+    <color name="ethOS_gray">#FFC8C8C8</color>
+    <color name="ethOS_darkgray">#FF262626</color>
+    <color name="ethOS_white">#FFFAFBFF</color>
+
+
+    <color name="ethOS_primary_button_bg">@color/ethOS_white</color>
+    <color name="ethOS_primary_button_text">@color/ethOS_black</color>
+
+    <color name="ethOS_secondary_button_bg">#00FFFFFF</color>
+    <color name="ethOS_secondary_button_text">@color/ethOS_white</color>
+
+    <color name="widget_shadow_color">#000000</color>
 </resources>
